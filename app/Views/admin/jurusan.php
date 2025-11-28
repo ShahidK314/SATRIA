@@ -18,7 +18,7 @@
     </div>
 
     <?php if (isset($_SESSION['toast'])): ?>
-        <div class="mb-4 p-4 rounded-lg bg-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-100 text-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-700 border border-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-200 text-sm font-bold">
+        <div class="mb-4 p-4 rounded-lg bg-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-100 text-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-700 border border-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-200 text-sm font-bold animate-fade-in-down">
             <?php echo $_SESSION['toast']['msg']; unset($_SESSION['toast']); ?>
         </div>
     <?php endif; ?>
@@ -54,7 +54,7 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <button onclick="editJurusan(<?php echo htmlspecialchars(json_encode($j)); ?>)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit">
+                                    <button onclick="editJurusan(<?php echo htmlspecialchars(json_encode($j), ENT_QUOTES, 'UTF-8'); ?>)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit">
                                         <span class="material-icons text-sm">edit</span>
                                     </button>
                                     
@@ -116,7 +116,6 @@
     const inputNama = document.getElementById('namaJurusan');
 
     function openModal() {
-        // Reset ke Mode Tambah
         form.action = '/master/jurusan/store';
         title.innerHTML = '<span class="material-icons text-blue-600 mr-2">add_business</span> Tambah Jurusan';
         inputId.value = '';
@@ -125,11 +124,10 @@
     }
 
     function editJurusan(data) {
-        // Set ke Mode Edit
         form.action = '/master/jurusan/update';
         title.innerHTML = '<span class="material-icons text-amber-600 mr-2">edit</span> Edit Jurusan';
         inputId.value = data.id;
-        inputNama.value = data.nama_jurusan;
+        inputNama.value = data.nama_jurusan; // Safe now
         modal.classList.remove('hidden');
     }
 

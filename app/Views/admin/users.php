@@ -13,7 +13,7 @@
     </div>
 
     <?php if (isset($_SESSION['toast'])): ?>
-        <div class="mb-4 p-4 rounded-lg bg-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-100 text-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-700 border border-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-200 text-sm font-bold">
+        <div class="mb-4 p-4 rounded-lg bg-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-100 text-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-700 border border-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-200 text-sm font-bold animate-fade-in-down">
             <?php echo $_SESSION['toast']['msg']; unset($_SESSION['toast']); ?>
         </div>
     <?php endif; ?>
@@ -22,7 +22,7 @@
         <form method="GET" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1 relative">
                 <span class="material-icons absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
-                <input type="text" name="search" placeholder="Cari nama atau email..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-colors text-sm outline-none">
+                <input type="text" name="search" placeholder="Cari nama atau email..." value="<?php echo htmlspecialchars($_GET['search'] ?? '', ENT_QUOTES); ?>" class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-colors text-sm outline-none">
             </div>
             <div class="flex-1 relative">
                 <span class="material-icons absolute left-3 top-2.5 text-slate-400 text-sm">filter_list</span>
@@ -54,54 +54,61 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <?php foreach ($users as $u): ?>
-                    <tr class="hover:bg-slate-50 transition-colors group">
-                        <td class="px-6 py-4">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                                <?php echo strtoupper(substr($u['username'], 0, 1)); ?>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-800 text-base mb-0.5 group-hover:text-blue-700 transition-colors">
-                                <?php echo htmlspecialchars($u['username']); ?>
-                            </div>
-                            <div class="text-xs text-slate-500 flex items-center">
-                                <span class="material-icons text-[10px] mr-1">email</span>
-                                <?php echo htmlspecialchars($u['email']); ?>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <span class="inline-block px-2.5 py-0.5 rounded text-xs font-bold border bg-slate-50 border-slate-200 text-slate-600 mb-1">
-                                <?php echo htmlspecialchars($u['role']); ?>
-                            </span>
-                            <div class="text-xs text-slate-500">
-                                <?php echo $u['nama_jurusan'] ? htmlspecialchars($u['nama_jurusan']) : '-'; ?>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <?php if ($u['is_active']): ?>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wide">Aktif</span>
-                            <?php else: ?>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide">Nonaktif</span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex justify-end gap-2">
-                                <button onclick="editUser(<?php echo htmlspecialchars(json_encode($u)); ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit User">
-                                    <span class="material-icons text-sm">edit</span>
-                                </button>
-
-                                <form method="post" action="/users/delete" onsubmit="return confirm('Nonaktifkan user ini?');" class="inline-block">
-                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                    <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
-                                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all" title="Hapus User">
-                                        <span class="material-icons text-sm">block</span>
+                    <?php if (empty($users)): ?>
+                        <tr><td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">Data pengguna tidak ditemukan.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($users as $u): ?>
+                        <tr class="hover:bg-slate-50 transition-colors group">
+                            <td class="px-6 py-4">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                    <?php echo strtoupper(substr($u['username'], 0, 1)); ?>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-slate-800 text-base mb-0.5 group-hover:text-blue-700 transition-colors">
+                                    <?php echo htmlspecialchars($u['username']); ?>
+                                </div>
+                                <div class="text-xs text-slate-500 flex items-center">
+                                    <span class="material-icons text-[10px] mr-1">email</span>
+                                    <?php echo htmlspecialchars($u['email']); ?>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="inline-block px-2.5 py-0.5 rounded text-xs font-bold border bg-slate-50 border-slate-200 text-slate-600 mb-1">
+                                    <?php echo htmlspecialchars($u['role']); ?>
+                                </span>
+                                <div class="text-xs text-slate-500">
+                                    <?php echo $u['nama_jurusan'] ? htmlspecialchars($u['nama_jurusan']) : '-'; ?>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <?php if ($u['is_active']): ?>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wide">Aktif</span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide">Nonaktif</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button onclick="editUser(<?php echo htmlspecialchars(json_encode($u), ENT_QUOTES, 'UTF-8'); ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit User">
+                                        <span class="material-icons text-sm">edit</span>
                                     </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+
+                                    <?php if ($u['id'] != $_SESSION['user_id']): ?>
+                                        <form method="post" action="/users/delete" onsubmit="return confirm('Nonaktifkan user ini? User tidak akan bisa login lagi.');" class="inline-block">
+                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                            <input type="hidden" name="id" value="<?php echo $u['id']; ?>">
+                                            <button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all" title="Nonaktifkan User">
+                                                <span class="material-icons text-sm">block</span>
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <div class="w-8 h-8"></div> <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -130,7 +137,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Username</label>
-                        <input type="text" name="username" id="inputUsername" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none text-sm font-medium" placeholder="namauser">
+                        <input type="text" name="username" id="inputUsername" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none text-sm font-medium" placeholder="namauser_hanya_huruf_angka">
+                        <p class="text-[10px] text-slate-400 mt-1">* Hanya huruf, angka, dan underscore (_)</p>
                     </div>
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
@@ -139,7 +147,7 @@
                     <div class="col-span-2">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" id="labelPassword">Password</label>
                         <input type="password" name="password" id="inputPassword" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none text-sm" placeholder="••••••••">
-                        <p class="text-[10px] text-slate-400 mt-1 hidden" id="hintPassword">* Kosongkan jika tidak ingin mengganti password</p>
+                        <p class="text-[10px] text-slate-400 mt-1" id="hintPassword">* Minimal 8 karakter</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Role</label>
@@ -185,11 +193,19 @@
         
         // Reset Inputs
         document.getElementById('userId').value = '';
-        document.getElementById('inputUsername').value = '';
+        const uname = document.getElementById('inputUsername');
+        uname.value = '';
+        uname.readOnly = false; // Username bisa diedit saat create
+        uname.classList.remove('bg-slate-100', 'text-slate-500');
+        
         document.getElementById('inputEmail').value = '';
-        document.getElementById('inputPassword').required = true;
-        document.getElementById('inputPassword').placeholder = '••••••••';
-        document.getElementById('hintPassword').classList.add('hidden');
+        
+        // Password Wajib saat Create
+        const pwd = document.getElementById('inputPassword');
+        pwd.required = true;
+        pwd.placeholder = '••••••••';
+        document.getElementById('hintPassword').innerText = '* Minimal 8 karakter';
+        
         document.getElementById('inputRole').selectedIndex = 0;
         document.getElementById('inputJurusan').value = '';
         
@@ -203,15 +219,22 @@
         
         // Fill Inputs
         document.getElementById('userId').value = data.id;
-        document.getElementById('inputUsername').value = data.username;
-        document.getElementById('inputEmail').value = data.email;
         
+        const uname = document.getElementById('inputUsername');
+        uname.value = data.username;
+        uname.readOnly = true; // Username TIDAK BISA diedit (menjaga integritas)
+        uname.classList.add('bg-slate-100', 'text-slate-500'); // Visual cue readonly
+        
+        document.getElementById('inputEmail').value = data.email;
+        document.getElementById('inputEmail').readOnly = true; // Email biasanya unik, sebaiknya read-only di edit simple
+        document.getElementById('inputEmail').classList.add('bg-slate-100', 'text-slate-500');
+
         // Password Optional saat Edit
         const pwd = document.getElementById('inputPassword');
         pwd.required = false;
         pwd.value = '';
-        pwd.placeholder = '(Biarkan kosong jika tetap)';
-        document.getElementById('hintPassword').classList.remove('hidden');
+        pwd.placeholder = '(Biarkan kosong jika tidak ubah)';
+        document.getElementById('hintPassword').innerText = '* Kosongkan jika password tetap';
         
         document.getElementById('inputRole').value = data.role;
         document.getElementById('inputJurusan').value = data.jurusan_id || '';

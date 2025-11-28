@@ -18,7 +18,7 @@
     </div>
 
     <?php if (isset($_SESSION['toast'])): ?>
-        <div class="mb-4 p-4 rounded-lg bg-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-100 text-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-700 border border-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-200 text-sm font-bold">
+        <div class="mb-4 p-4 rounded-lg bg-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-100 text-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-700 border border-<?php echo $_SESSION['toast']['type'] == 'success' ? 'emerald' : 'rose'; ?>-200 text-sm font-bold animate-fade-in-down">
             <?php echo $_SESSION['toast']['msg']; unset($_SESSION['toast']); ?>
         </div>
     <?php endif; ?>
@@ -55,7 +55,7 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-2">
-                                    <button onclick="editIku(<?php echo htmlspecialchars(json_encode($i)); ?>)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Edit"><span class="material-icons text-sm">edit</span></button>
+                                    <button onclick="editIku(<?php echo htmlspecialchars(json_encode($i), ENT_QUOTES, 'UTF-8'); ?>)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Edit"><span class="material-icons text-sm">edit</span></button>
                                     
                                     <form action="/master/iku/toggle-status" method="POST" onsubmit="return confirm('Ubah status IKU ini?')">
                                         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
