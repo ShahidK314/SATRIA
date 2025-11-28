@@ -144,6 +144,22 @@ class AdminController
         require __DIR__ . '/../Views/admin/iku.php';
     }
 
+    public function toggleIkuStatus() {
+        $this->checkAdmin();
+        if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) die('Invalid Token');
+        
+        $id = $_POST['id'];
+        $currentStatus = $_POST['current_status'];
+        $newStatus = ($currentStatus === 'active') ? 'inactive' : 'active';
+        
+        $stmt = $this->db->prepare("UPDATE master_iku SET status = ? WHERE id = ?");
+        $stmt->execute([$newStatus, $id]);
+        
+        $_SESSION['toast'] = ['type' => 'success', 'msg' => 'Status IKU berhasil diubah.'];
+        header('Location: /master/iku');
+        exit;
+    }
+
     public function storeIku() {
         $this->checkAdmin();
         if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) die('Invalid Token');

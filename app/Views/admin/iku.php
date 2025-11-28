@@ -49,10 +49,22 @@
                             </td>
                             <td class="px-6 py-4">
                                 <p class="text-slate-700 font-medium leading-relaxed"><?php echo htmlspecialchars($i['deskripsi_iku']); ?></p>
+                                <?php if ($i['status'] === 'inactive'): ?>
+                                    <span class="inline-block mt-2 px-2 py-0.5 bg-slate-100 text-slate-500 text-xs rounded font-bold">DIARSIPKAN</span>
+                                <?php endif; ?>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end gap-2">
                                     <button onclick="editIku(<?php echo htmlspecialchars(json_encode($i)); ?>)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Edit"><span class="material-icons text-sm">edit</span></button>
+                                    
+                                    <form action="/master/iku/toggle-status" method="POST" onsubmit="return confirm('Ubah status IKU ini?')">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                        <input type="hidden" name="id" value="<?php echo $i['id']; ?>">
+                                        <input type="hidden" name="current_status" value="<?php echo $i['status']; ?>">
+                                        <button type="submit" class="text-slate-400 hover:text-amber-600 transition-colors p-1" title="<?php echo $i['status'] === 'active' ? 'Arsipkan' : 'Aktifkan'; ?>">
+                                            <span class="material-icons text-sm"><?php echo $i['status'] === 'active' ? 'archive' : 'unarchive'; ?></span>
+                                        </button>
+                                    </form>
                                     
                                     <form action="/master/iku/delete" method="POST" onsubmit="return confirm('Hapus IKU ini?')">
                                         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">

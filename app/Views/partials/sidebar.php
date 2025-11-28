@@ -62,7 +62,7 @@ $menu = $menus[$role] ?? [];
         <img src="/logo_pnj.png" alt="Logo PNJ" class="w-9 h-9 mr-3 drop-shadow-sm">
         <div class="flex flex-col">
             <span class="text-xl font-extrabold text-slate-900 tracking-tight leading-none">SATRIA</span>
-            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">Enterprise</span>
+            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">PNJ</span>
         </div>
     </div>
 

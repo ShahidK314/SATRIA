@@ -38,6 +38,7 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+
         <?php if (empty($usulan)): ?>
             <div class="p-12 text-center">
                 <span class="material-icons text-slate-300 text-5xl mb-2">toc</span>
@@ -45,6 +46,9 @@
                 <p class="text-slate-500 text-sm">Belum ada usulan yang masuk kriteria pencarian.</p>
             </div>
         <?php else: ?>
+
+            <?php $isEditable = $isEditable ?? false; // FIX: tambahkan default isEditable ?>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left border-collapse">
                     <thead class="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] border-b border-slate-200">
@@ -157,16 +161,19 @@
                                         <span class="material-icons text-sm">visibility</span>
                                     </a>
 
-                                    <?php 
-                                    // [SECURITY CHECK] Hanya tampilkan Edit/Hapus jika status masih Draft/Revisi/Ditolak
-                                    // Dan pastikan user yang login adalah pemiliknya (Pengusul)
-                                    $isEditable = in_array($s, ['Draft', 'Revisi', 'Ditolak']) && $row['user_id'] == $_SESSION['user_id'];
-                                    
-                                    if ($isEditable): 
-                                    ?>
+                                    <?php if ($isEditable): ?>
                                         <a href="/usulan/edit?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all" title="Edit Usulan">
                                             <span class="material-icons text-sm">edit</span>
                                         </a>
+
+                                        <?php if ($s === 'Draft'): ?>
+                                        <form action="/usulan/ajukan?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('Yakin ingin mengajukan usulan ini ke Verifikator?');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all" title="Ajukan ke Verifikator">
+                                                <span class="material-icons text-sm">send</span>
+                                            </button>
+                                        </form>
+                                        <?php endif; ?>
 
                                         <form action="/usulan/delete?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('PERINGATAN: Data yang dihapus tidak dapat dikembalikan.\n\nApakah Anda yakin ingin menghapus usulan ini?');">
                                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">

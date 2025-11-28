@@ -3,11 +3,12 @@
 namespace App\Controllers;
 
 use PDO;
-use App\Models\UsulanModel; // Import Model Baru
+use App\Models\UsulanModel;
 
 class MonitoringController
 {
     private $db;
+
     public function __construct($db)
     {
         $this->db = $db;
@@ -20,10 +21,10 @@ class MonitoringController
             exit;
         }
 
-        // [ELITE REFACTORING] Menggunakan Model, bukan Query SQL mentah
+        // Load Model
         $usulanModel = new UsulanModel($this->db);
 
-        // Siapkan Filter dari Input User & Sesi
+        // Filters
         $filters = [
             'role'    => $_SESSION['role'] ?? '',
             'user_id' => $_SESSION['user_id'],
@@ -32,10 +33,19 @@ class MonitoringController
             'date'    => $_GET['date'] ?? ''
         ];
 
-        // Ambil Data via Model
+        // Data for table
         $usulan = $usulanModel->getAllWithUser($filters, $page, $perPage);
         $total  = $usulanModel->countAllWithUser($filters);
 
+        // ----------------------------------------
+        // FIX UTAMA → Tambahkan $isEditable
+        // ----------------------------------------
+        $role = $_SESSION['role'] ?? '';
+
+        // Role yang boleh edit monitoring
+        $isEditable = in_array($role, ['admin', 'superadmin', 'departemen']);
+
+        // Kirim variable ke View
         require __DIR__ . '/../Views/monitoring/index.php';
     }
 }

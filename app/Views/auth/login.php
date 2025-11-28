@@ -31,7 +31,7 @@
             </div>
 
             <div class="text-xs text-blue-300/60 font-mono">
-                v1.0 Enterprise Edition
+                
             </div>
         </div>
 

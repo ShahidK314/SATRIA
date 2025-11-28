@@ -23,11 +23,9 @@ class UsulanController
         exit;
     }
 
-    // [ELITE HELPER] Membersihkan format uang/angka
     private function cleanNumber($value)
     {
         if (empty($value)) return 0;
-        // Hapus karakter non-angka kecuali titik/koma desimal
         $clean = preg_replace('/[^0-9.]/', '', $value); 
         return floatval($clean);
     }
@@ -42,7 +40,9 @@ class UsulanController
         }
     }
 
-    // --- CREATE ---
+    // ============================================
+    // CREATE - Wizard Step untuk Buat Usulan Baru
+    // ============================================
     public function create() 
     {
         $this->ensureLogin();
@@ -50,19 +50,21 @@ class UsulanController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->processStore($_POST, 'create');
         } else {
-            // Data Master untuk Dropdown
-            $jurusan  = $this->db->query("SELECT * FROM master_jurusan ORDER BY nama_jurusan")->fetchAll(PDO::FETCH_ASSOC);
-            $iku      = $this->db->query("SELECT * FROM master_iku ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+            // Data Master untuk Form
+            $iku = $this->db->query("SELECT * FROM master_iku WHERE status = 'active' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
             $kategori = $this->db->query("SELECT * FROM master_kategori_anggaran ORDER BY nama_kategori")->fetchAll(PDO::FETCH_ASSOC);
             
-            // Dummy array untuk view agar tidak error
             $rabData = []; 
+            $usulan = null; // Untuk mode create
+            $selectedIku = [];
             
-            require __DIR__ . '/../Views/usulan/wizard.php';
+            require __DIR__ . '/../Views/usulan/wizard_new.php';
         }
     }
 
-    // --- EDIT ---
+    // ============================================
+    // EDIT - Load Data Usulan yang Sudah Ada
+    // ============================================
     public function edit($id) 
     {
         $this->ensureLogin();
@@ -72,45 +74,63 @@ class UsulanController
             $this->redirectWithMsg('/monitoring', 'error', 'Akses ditolak atau data tidak ditemukan.');
         }
         
-        // Hanya boleh edit jika status Draft, Revisi, atau Ditolak
+        // Hanya boleh edit jika status Draft atau Revisi
         if (!in_array($usulan['status_terkini'], ['Draft', 'Revisi', 'Ditolak'])) {
             $this->redirectWithMsg('/monitoring', 'error', 'Usulan sedang diproses, tidak dapat diedit.');
         }
 
-        $rabData = $this->db->prepare("SELECT * FROM rab_detail WHERE usulan_id = ?");
+        // Load RAB Details
+        $rabData = $this->db->prepare("SELECT * FROM rab_detail WHERE usulan_id = ? ORDER BY kategori_id");
         $rabData->execute([$id]);
         $rabData = $rabData->fetchAll(PDO::FETCH_ASSOC);
 
-        $ikuRel = $this->db->prepare("SELECT iku_id FROM tor_iku WHERE usulan_id = ?");
+        // Load IKU dengan Bobot
+        $ikuRel = $this->db->prepare("SELECT iku_id, bobot_persen FROM tor_iku WHERE usulan_id = ?");
         $ikuRel->execute([$id]);
-        $selectedIku = $ikuRel->fetchAll(PDO::FETCH_COLUMN);
+        $selectedIku = [];
+        while ($row = $ikuRel->fetch(PDO::FETCH_ASSOC)) {
+            $selectedIku[$row['iku_id']] = $row['bobot_persen'];
+        }
 
-        $jurusan  = $this->db->query("SELECT * FROM master_jurusan ORDER BY nama_jurusan")->fetchAll(PDO::FETCH_ASSOC);
-        $iku      = $this->db->query("SELECT * FROM master_iku ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+        $iku = $this->db->query("SELECT * FROM master_iku WHERE status = 'active' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
         $kategori = $this->db->query("SELECT * FROM master_kategori_anggaran ORDER BY nama_kategori")->fetchAll(PDO::FETCH_ASSOC);
 
+        // Decode JSON fields
+        if (!empty($usulan['metode_pelaksanaan'])) {
+            $usulan['metode_array'] = json_decode($usulan['metode_pelaksanaan'], true) ?: [];
+        }
+        if (!empty($usulan['tahapan_pelaksanaan'])) {
+            $usulan['tahapan_array'] = json_decode($usulan['tahapan_pelaksanaan'], true) ?: [];
+        }
+        if (!empty($usulan['indikator_kinerja'])) {
+            $usulan['indikator_array'] = json_decode($usulan['indikator_kinerja'], true) ?: [];
+        }
+
         $isEdit = true;
-        require __DIR__ . '/../Views/usulan/wizard.php';
+        require __DIR__ . '/../Views/usulan/wizard_new.php';
     }
 
-    // --- UPDATE ---
+    // ============================================
+    // UPDATE - Simpan Perubahan Usulan
+    // ============================================
     public function update($id) 
     {
         $this->ensureLogin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->processStore($_POST, 'update', $id);
         } else {
-            $this->edit($id); // Fallback jika diakses via GET
+            $this->edit($id);
         }
     }
 
-    // --- DELETE ---
+    // ============================================
+    // DELETE - Hapus Usulan
+    // ============================================
     public function delete($id) 
     {
         $this->ensureLogin();
         $this->validateCsrf();
 
-        // Cek kepemilikan & status
         $stmt = $this->db->prepare("SELECT status_terkini, user_id FROM usulan_kegiatan WHERE id = ?");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
@@ -123,7 +143,9 @@ class UsulanController
         }
     }
 
-    // --- DETAIL ---
+    // ============================================
+    // DETAIL - Lihat Detail Usulan
+    // ============================================
     public function detail($id) 
     {
         $this->ensureLogin();
@@ -145,7 +167,7 @@ class UsulanController
         $rab->execute([$id]);
         $rabDetails = $rab->fetchAll(PDO::FETCH_ASSOC);
 
-        $iku = $this->db->prepare("SELECT m.deskripsi_iku FROM tor_iku t JOIN master_iku m ON t.iku_id = m.id WHERE t.usulan_id = ?");
+        $iku = $this->db->prepare("SELECT m.deskripsi_iku, t.bobot_persen FROM tor_iku t JOIN master_iku m ON t.iku_id = m.id WHERE t.usulan_id = ?");
         $iku->execute([$id]);
         $ikuDetails = $iku->fetchAll(PDO::FETCH_ASSOC);
         
@@ -153,34 +175,84 @@ class UsulanController
         $logs->execute([$id]);
         $logHistori = $logs->fetchAll(PDO::FETCH_ASSOC);
 
+        // Decode JSON
+        if (!empty($usulan['metode_pelaksanaan'])) {
+            $usulan['metode_array'] = json_decode($usulan['metode_pelaksanaan'], true) ?: [];
+        }
+        if (!empty($usulan['tahapan_pelaksanaan'])) {
+            $usulan['tahapan_array'] = json_decode($usulan['tahapan_pelaksanaan'], true) ?: [];
+        }
+        if (!empty($usulan['indikator_kinerja'])) {
+            $usulan['indikator_array'] = json_decode($usulan['indikator_kinerja'], true) ?: [];
+        }
+
         require __DIR__ . '/../Views/usulan/detail.php';
     }
 
     // ==========================================
-    // [ELITE CORE LOGIC] - PROCESS STORE (FIXED)
+    // PROCESS STORE - Core Logic untuk Save
     // ==========================================
     private function processStore($data, $mode, $id = null) 
     {
         $this->validateCsrf();
 
-        // 1. Sanitasi Input Dasar
+        // STEP 1: Validasi Input Dasar (KAK)
         $namaKegiatan = trim($data['nama_kegiatan'] ?? '');
-        $gambaranUmum = trim($data['gambaran_umum'] ?? ''); // HTMLSpecialChars sudah via Router
+        $gambaranUmum = trim($data['gambaran_umum'] ?? '');
         $penerimaManfaat = trim($data['penerima_manfaat'] ?? '');
         $targetLuaran = trim($data['target_luaran'] ?? '');
+        $tanggalMulai = $data['tanggal_mulai'] ?? null;
+        $tanggalSelesai = $data['tanggal_selesai'] ?? null;
 
         if (empty($namaKegiatan) || empty($gambaranUmum)) {
             $this->redirectWithMsg($_SERVER['HTTP_REFERER'], 'error', 'Nama Kegiatan dan Gambaran Umum wajib diisi.');
+        }
+
+        // Array JSON untuk metode & tahapan
+        $metodeArray = [];
+        if (!empty($data['metode'])) {
+            foreach ($data['metode'] as $m) {
+                if (!empty(trim($m))) $metodeArray[] = trim($m);
+            }
+        }
+
+        $tahapanArray = [];
+        if (!empty($data['tahapan'])) {
+            foreach ($data['tahapan'] as $t) {
+                if (!empty(trim($t))) $tahapanArray[] = trim($t);
+            }
+        }
+
+        // Indikator Kinerja (untuk tampilan, bukan IKU)
+        $indikatorArray = [];
+        if (!empty($data['indikator_keberhasilan'])) {
+            foreach ($data['indikator_keberhasilan'] as $idx => $ind) {
+                if (!empty(trim($ind))) {
+                    $indikatorArray[] = [
+                        'indikator' => trim($ind),
+                        'bulan_target' => $data['bulan_target'][$idx] ?? '',
+                        'bobot' => $this->cleanNumber($data['bobot_keberhasilan'][$idx] ?? 0)
+                    ];
+                }
+            }
         }
 
         try {
             $this->db->beginTransaction();
 
             if ($mode === 'create') {
-                // [INSERT HEADER]
-                $sql = "INSERT INTO usulan_kegiatan (user_id, nama_kegiatan, gambaran_umum, penerima_manfaat, target_luaran, status_terkini, nominal_pencairan) 
-                        VALUES (:uid, :nama, :umum, :manfaat, :luaran, 'Verifikasi', 0)"; 
-                // Default status langsung 'Verifikasi' agar masuk antrian verifikator
+                // INSERT HEADER
+                $sql = "INSERT INTO usulan_kegiatan (
+                    user_id, nama_kegiatan, gambaran_umum, penerima_manfaat, target_luaran,
+                    metode_pelaksanaan, tahapan_pelaksanaan, indikator_kinerja,
+                    tanggal_mulai, tanggal_selesai,
+                    status_terkini, nominal_pencairan
+                ) VALUES (
+                    :uid, :nama, :umum, :manfaat, :luaran,
+                    :metode, :tahapan, :indikator,
+                    :tgl_mulai, :tgl_selesai,
+                    'Draft', 0
+                )"; 
                 
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute([
@@ -188,51 +260,67 @@ class UsulanController
                     'nama' => $namaKegiatan,
                     'umum' => $gambaranUmum,
                     'manfaat' => $penerimaManfaat,
-                    'luaran' => $targetLuaran
+                    'luaran' => $targetLuaran,
+                    'metode' => json_encode($metodeArray),
+                    'tahapan' => json_encode($tahapanArray),
+                    'indikator' => json_encode($indikatorArray),
+                    'tgl_mulai' => $tanggalMulai,
+                    'tgl_selesai' => $tanggalSelesai
                 ]);
                 $usulanId = $this->db->lastInsertId();
                 
-                $this->usulanModel->addLog($usulanId, $_SESSION['user_id'], null, 'Verifikasi', 'Usulan baru diajukan');
+                $this->usulanModel->addLog($usulanId, $_SESSION['user_id'], null, 'Draft', 'Usulan baru dibuat');
 
             } else {
-                // [UPDATE HEADER]
+                // UPDATE HEADER
                 $usulanId = $id;
                 $currentData = $this->usulanModel->findById($id);
                 if(!$currentData) throw new \Exception("Data tidak ditemukan.");
 
-                // Jika status sebelumnya Revisi/Ditolak, kembalikan ke Verifikasi saat update
-                $newStatus = in_array($currentData['status_terkini'], ['Revisi', 'Ditolak']) ? 'Verifikasi' : $currentData['status_terkini'];
-
                 $sql = "UPDATE usulan_kegiatan 
-                        SET nama_kegiatan = :nama, gambaran_umum = :umum, penerima_manfaat = :manfaat, target_luaran = :luaran, status_terkini = :status, updated_at = NOW() 
+                        SET nama_kegiatan = :nama, gambaran_umum = :umum, penerima_manfaat = :manfaat, 
+                            target_luaran = :luaran, metode_pelaksanaan = :metode, tahapan_pelaksanaan = :tahapan,
+                            indikator_kinerja = :indikator, tanggal_mulai = :tgl_mulai, tanggal_selesai = :tgl_selesai,
+                            updated_at = NOW() 
                         WHERE id = :id";
                 $this->db->prepare($sql)->execute([
                     'nama' => $namaKegiatan,
                     'umum' => $gambaranUmum,
                     'manfaat' => $penerimaManfaat,
                     'luaran' => $targetLuaran,
-                    'status' => $newStatus,
+                    'metode' => json_encode($metodeArray),
+                    'tahapan' => json_encode($tahapanArray),
+                    'indikator' => json_encode($indikatorArray),
+                    'tgl_mulai' => $tanggalMulai,
+                    'tgl_selesai' => $tanggalSelesai,
                     'id' => $id
                 ]);
 
-                // Bersihkan Detail Lama (Untuk di-insert ulang)
+                // Bersihkan Detail Lama
                 $this->db->prepare("DELETE FROM tor_iku WHERE usulan_id = ?")->execute([$id]);
                 $this->db->prepare("DELETE FROM rab_detail WHERE usulan_id = ?")->execute([$id]);
                 
-                if ($newStatus !== $currentData['status_terkini']) {
-                    $this->usulanModel->addLog($usulanId, $_SESSION['user_id'], $currentData['status_terkini'], $newStatus, 'Revisi & Resubmit');
-                }
+                $this->usulanModel->addLog($usulanId, $_SESSION['user_id'], $currentData['status_terkini'], 'Draft', 'Usulan diperbarui');
             }
 
-            // 2. INSERT IKU (Indikator Kinerja)
+            // STEP 2: INSERT IKU dengan Bobot
             if (!empty($data['iku_id']) && is_array($data['iku_id'])) {
-                $stmtIku = $this->db->prepare("INSERT INTO tor_iku (usulan_id, iku_id) VALUES (?, ?)");
+                $stmtIku = $this->db->prepare("INSERT INTO tor_iku (usulan_id, iku_id, bobot_persen) VALUES (?, ?, ?)");
+                $totalBobot = 0;
+                
                 foreach ($data['iku_id'] as $ikuId) {
-                    $stmtIku->execute([$usulanId, (int)$ikuId]);
+                    $bobot = $this->cleanNumber($data['bobot_iku'][$ikuId] ?? 0);
+                    $totalBobot += $bobot;
+                    $stmtIku->execute([$usulanId, (int)$ikuId, $bobot]);
+                }
+                
+                // Validasi total bobot harus 100%
+                if (abs($totalBobot - 100) > 0.01) {
+                    throw new \Exception("Total bobot IKU harus 100%. Saat ini: {$totalBobot}%");
                 }
             }
 
-            // 3. INSERT RAB (Safe Loop Logic)
+            // STEP 3: INSERT RAB
             $totalPengajuan = 0;
             
             if (!empty($data['uraian']) && is_array($data['uraian'])) {
@@ -240,15 +328,14 @@ class UsulanController
                 
                 foreach ($data['uraian'] as $key => $val) {
                     $uraian = trim($val);
-                    if (empty($uraian)) continue; // Skip baris kosong
+                    if (empty($uraian)) continue;
 
-                    // Ambil data berdasarkan key yang sama, handle potential missing keys
                     $vol = isset($data['volume'][$key]) ? $this->cleanNumber($data['volume'][$key]) : 0;
                     $harga = isset($data['harga_satuan'][$key]) ? $this->cleanNumber($data['harga_satuan'][$key]) : 0;
                     $satuan = trim($data['satuan'][$key] ?? '');
                     $kategoriId = (int)($data['kategori_id'][$key] ?? 0);
 
-                    if ($vol <= 0 || $harga < 0) continue; // Validasi angka logis
+                    if ($vol <= 0 || $harga < 0) continue;
 
                     $totalItem = $vol * $harga;
                     $totalPengajuan += $totalItem;
@@ -257,21 +344,45 @@ class UsulanController
                 }
             }
 
-            // 4. Update Total Nominal ke Header (PENTING agar dashboard update)
+            // Update Total Nominal
             $this->db->prepare("UPDATE usulan_kegiatan SET nominal_pencairan = ? WHERE id = ?")
                      ->execute([$totalPengajuan, $usulanId]);
 
             $this->db->commit();
             
-            // Redirect Sukses
-            $this->redirectWithMsg('/monitoring', 'success', 'Data usulan berhasil disimpan & diteruskan!');
+            $this->redirectWithMsg('/monitoring', 'success', 'Data usulan berhasil disimpan sebagai Draft!');
 
         } catch (Throwable $e) { 
             $this->db->rollBack();
-            // Log error detail ke server
             error_log("CRITICAL ERROR UsulanController: " . $e->getMessage());
-            // Tampilkan pesan user-friendly
             $this->redirectWithMsg($_SERVER['HTTP_REFERER'], 'error', 'Gagal menyimpan: ' . $e->getMessage());
         }
+    }
+
+    // ============================================
+    // AJUKAN - Submit usulan dari Draft ke Verifikasi
+    // ============================================
+    public function ajukan($id)
+    {
+        $this->ensureLogin();
+        $this->validateCsrf();
+
+        $usulan = $this->usulanModel->findById($id);
+        
+        if (!$usulan || $usulan['user_id'] != $_SESSION['user_id']) {
+            $this->redirectWithMsg('/monitoring', 'error', 'Akses ditolak.');
+        }
+
+        if ($usulan['status_terkini'] !== 'Draft') {
+            $this->redirectWithMsg('/monitoring', 'error', 'Hanya usulan berstatus Draft yang bisa diajukan.');
+        }
+
+        // Update status ke Verifikasi
+        $this->db->prepare("UPDATE usulan_kegiatan SET status_terkini = 'Verifikasi', updated_at = NOW() WHERE id = ?")
+                 ->execute([$id]);
+
+        $this->usulanModel->addLog($id, $_SESSION['user_id'], 'Draft', 'Verifikasi', 'Usulan diajukan untuk diverifikasi');
+
+        $this->redirectWithMsg('/monitoring', 'success', 'Usulan berhasil diajukan ke Verifikator!');
     }
 }

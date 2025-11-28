@@ -119,6 +119,8 @@ if ($uri === '/' || $uri === '/index.php') {
     $ctl = new UsulanController($db); $ctl->update(getId());
 } elseif ($uri === '/usulan/delete') {
     $ctl = new UsulanController($db); $ctl->delete(getId());
+} elseif ($uri === '/usulan/ajukan') {
+    $ctl = new UsulanController($db); $ctl->ajukan(getId());
 } elseif ($uri === '/usulan/detail') {
     $ctl = new UsulanController($db); $ctl->detail(getId());
 
@@ -173,6 +175,8 @@ if ($uri === '/' || $uri === '/index.php') {
     $ctl = new AdminController($db); $ctl->storeIku();
 } elseif ($uri === '/master/iku/update') {
     $ctl = new AdminController($db); $ctl->updateIku();
+} elseif ($uri === '/master/iku/toggle-status') {
+    $ctl = new AdminController($db); $ctl->toggleIkuStatus();
 } elseif ($uri === '/master/iku/delete') {
     $ctl = new AdminController($db); $ctl->deleteIku();
 } elseif ($uri === '/audit-log') {

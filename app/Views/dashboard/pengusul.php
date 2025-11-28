@@ -7,7 +7,7 @@
             <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold mb-3">
                 <span class="material-icons text-sm mr-2">verified</span> Akun Pengusul Aktif
             </div>
-            <h1 class="text-4xl font-extrabold tracking-tight mb-2">Halo, Inovator! 🚀</h1>
+            <h1 class="text-4xl font-extrabold tracking-tight mb-2">Halo, Pengusul!</h1>
             <p class="text-blue-50 text-lg max-w-2xl">Realisasikan ide kegiatan akademik Anda. Kami siap memfasilitasi pengajuan anggaran yang transparan dan cepat.</p>
             
             <div class="mt-8 flex gap-4">
@@ -15,7 +15,7 @@
                     <span class="material-icons mr-2">add_circle</span> Buat Usulan Baru
                 </a>
                 <a href="/monitoring" class="px-6 py-3 bg-blue-700/50 text-white border border-white/30 font-bold rounded-lg hover:bg-blue-700 transition-all flex items-center">
-                    <span class="material-icons mr-2">history</span> Riwayat
+                    <span class="material-icons mr-2">history</span> Monitoring
                 </a>
             </div>
         </div>
