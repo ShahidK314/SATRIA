@@ -94,6 +94,28 @@
             </div>
             <?php endif; ?>
 
+            <?php if(!empty($docs)): ?>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mt-6">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-6 flex items-center border-b border-slate-100 pb-4">
+                    <span class="material-icons text-violet-500 mr-2">attach_file</span> Dokumen Pendukung
+                </h3>
+                <div class="space-y-3">
+                    <?php foreach($docs as $doc): ?>
+                    <a href="<?php echo htmlspecialchars($doc['file_path']); ?>" target="_blank" class="flex items-center p-4 border border-slate-100 rounded-xl hover:bg-violet-50 hover:border-violet-200 group transition-all">
+                        <div class="w-12 h-12 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center mr-4 shadow-sm">
+                            <span class="material-icons">description</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-bold text-slate-700 group-hover:text-violet-800"><?php echo htmlspecialchars($doc['jenis_dokumen']); ?></div>
+                            <div class="text-xs text-slate-400 mt-0.5">Diunggah: <?php echo date('d M Y H:i', strtotime($doc['uploaded_at'])); ?></div>
+                        </div>
+                        <span class="material-icons text-slate-300 group-hover:text-violet-600">download</span>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <?php if($usulan['status_terkini'] === 'Disetujui' || $usulan['status_terkini'] === 'Pencairan'): ?>
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-6 flex items-center">

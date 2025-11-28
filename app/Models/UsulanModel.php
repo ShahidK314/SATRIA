@@ -12,35 +12,30 @@ class UsulanModel
         $this->db = $db;
     }
 
-    // --- [CORE] Filter Logic ---
+    // --- CORE FILTER LOGIC ---
     private function buildWhereClause($filters, &$params)
     {
         $sql = " WHERE 1=1";
 
+        // Filter Khusus Pengusul (Hanya lihat data sendiri)
         if (!empty($filters['role']) && $filters['role'] === 'Pengusul' && !empty($filters['user_id'])) {
             $sql .= " AND u.user_id = :uid";
             $params['uid'] = $filters['user_id'];
         }
+        // Pencarian Global
         if (!empty($filters['search'])) {
             $sql .= " AND (u.nama_kegiatan LIKE :q OR us.username LIKE :q)";
             $params['q'] = "%" . $filters['search'] . "%";
         }
+        // Filter Status
         if (!empty($filters['status'])) {
             $sql .= " AND u.status_terkini = :status";
             $params['status'] = $filters['status'];
         }
+        // Filter Tanggal
         if (!empty($filters['date'])) {
             $sql .= " AND DATE(u.created_at) = :fdate";
             $params['fdate'] = $filters['date'];
-        }
-        if (!empty($filters['status_in']) && is_array($filters['status_in'])) {
-            $placeholders = [];
-            foreach ($filters['status_in'] as $k => $val) {
-                $key = ":st_in_" . $k;
-                $placeholders[] = $key;
-                $params[$key] = $val;
-            }
-            $sql .= " AND u.status_terkini IN (" . implode(',', $placeholders) . ")";
         }
 
         return $sql;
@@ -77,8 +72,6 @@ class UsulanModel
         return $stmt->fetchColumn();
     }
 
-    // --- [MISSING METHOD FIX] ---
-    // Metode ini yang sebelumnya hilang dan menyebabkan error di Bendahara
     public function getByStatus($statuses)
     {
         if (!is_array($statuses)) $statuses = [$statuses];
@@ -102,7 +95,29 @@ class UsulanModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // --- Statistik ---
+    // --- DATA DETAIL & DOKUMEN ---
+    public function findById($id)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM usulan_kegiatan WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // [BARU] Fitur Dokumen
+    public function getDocuments($usulanId)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM dokumen_pendukung WHERE usulan_id = ? ORDER BY uploaded_at DESC");
+        $stmt->execute([$usulanId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addDocument($usulanId, $jenis, $path)
+    {
+        $stmt = $this->db->prepare("INSERT INTO dokumen_pendukung (usulan_id, jenis_dokumen, file_path) VALUES (?, ?, ?)");
+        return $stmt->execute([$usulanId, $jenis, $path]);
+    }
+
+    // --- STATISTIK & TOOLS ---
     public function getDashboardStats()
     {
         $sql = "SELECT 
@@ -136,14 +151,6 @@ class UsulanModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // --- Actions ---
-    public function findById($id)
-    {
-        $stmt = $this->db->prepare("SELECT * FROM usulan_kegiatan WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
     public function cairkanDana($id, $tglCair, $tglLpj, $nominal)
     {
         $sql = "UPDATE usulan_kegiatan 
@@ -169,12 +176,8 @@ class UsulanModel
         $stmt->execute([$usulanId, $userId, $oldStatus, $newStatus, $note]);
     }
 
-    // --- [NEW] ELITE FEATURE: DETEKSI KETERLAMBATAN ---
     public function getOverdueItems()
     {
-        // Ambil kegiatan yang:
-        // 1. Sudah cair (status Pencairan/LPJ) tapi belum Selesai.
-        // 2. Tanggal batas LPJ sudah lewat hari ini.
         $sql = "SELECT u.*, us.username, us.email 
                 FROM usulan_kegiatan u 
                 JOIN users us ON u.user_id = us.id 

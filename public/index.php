@@ -123,6 +123,13 @@ if ($uri === '/' || $uri === '/index.php') {
     $ctl = new UsulanController($db); $ctl->ajukan(getId());
 } elseif ($uri === '/usulan/detail') {
     $ctl = new UsulanController($db); $ctl->detail(getId());
+} elseif ($uri === '/usulan/ajukan') {
+    $ctl = new UsulanController($db); $ctl->ajukan(getId());
+// [BARU] Route untuk Skenario 2
+} elseif ($uri === '/usulan/lengkapi') {
+    $ctl = new UsulanController($db); $ctl->lengkapi(getId());
+} elseif ($uri === '/usulan/proses-lengkapi') {
+    $ctl = new UsulanController($db); $ctl->prosesLengkapi(getId());
 
 // VERIFIKASI
 } elseif ($uri === '/verifikasi') {

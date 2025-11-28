@@ -175,6 +175,16 @@
                                         </form>
                                         <?php endif; ?>
 
+                                        <?php if ($s === 'Disetujui Verifikator'): ?>
+                                        <a href="/usulan/lengkapi?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center px-3 py-1.5 bg-violet-600 text-white text-[10px] font-bold rounded hover:bg-violet-700 transition-all" title="Upload Surat & Ajukan">
+                                            <span class="material-icons text-xs mr-1">upload_file</span> Ajukan WD2
+                                                </a>
+                                            <?php endif; ?>
+
+                                        <?php if (in_array($s, ['Draft', 'Revisi'])): ?>
+                                            <a href="/usulan/edit?id=<?php echo $row['id']; ?>" class="..."><span class="material-icons text-sm">edit</span></a>
+                                        <?php endif; ?>
+                                        
                                         <form action="/usulan/delete?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('PERINGATAN: Data yang dihapus tidak dapat dikembalikan.\n\nApakah Anda yakin ingin menghapus usulan ini?');">
                                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                                             <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="Hapus Permanen">

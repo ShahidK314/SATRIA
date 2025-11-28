@@ -59,54 +59,30 @@ class VerifikasiController
     public function aksi($id)
     {
         if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'Verifikator') {
-            header('Location: /login');
-            exit;
+            header('Location: /login'); exit;
+        }
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) die('Invalid Token');
+
+        $aksi = $_POST['aksi'];
+        $catatan = trim($_POST['catatan']);
+        $kode_mak = trim($_POST['kode_mak']);
+
+        $status = 'Disetujui Verifikator'; // TARGET BARU
+        if ($aksi === 'revisi') $status = 'Revisi';
+        if ($aksi === 'tolak') $status = 'Ditolak';
+
+        $this->db->prepare("UPDATE usulan_kegiatan SET status_terkini=?, kode_mak=? WHERE id=?")->execute([$status, $kode_mak, $id]);
+        
+        // Log & Notif
+        $this->db->prepare("INSERT INTO log_histori_usulan (usulan_id, user_id, status_lama, status_baru, catatan) VALUES (?,?,'Verifikasi',?,?)")->execute([$id, $_SESSION['user_id'], $status, $catatan]);
+        
+        // Jika disetujui, notif user untuk upload
+        if($status === 'Disetujui Verifikator') {
+            $user = $this->db->query("SELECT user_id FROM usulan_kegiatan WHERE id=$id")->fetchColumn();
+            $this->db->prepare("INSERT INTO notifikasi (user_id, judul, pesan, link) VALUES (?, 'Verifikasi Selesai', 'Usulan disetujui. Silakan lengkapi data PJ & Upload Surat Pengantar.', ?)")->execute([$user, "/usulan/lengkapi?id=$id"]);
         }
 
-        // [ELITE SECURITY] CSRF Check
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-             die('Security Alert: Invalid CSRF Token.');
-        }
-
-        $aksi = $_POST['aksi'] ?? '';
-        $catatan = trim($_POST['catatan'] ?? '');
-        $kode_mak = trim($_POST['kode_mak'] ?? '');
-        $userId = $_SESSION['user_id'];
-
-        $statusBaru = '';
-        if ($aksi === 'setuju') {
-            // Jika setuju, lempar ke WD2 (Sesuai Flow)
-            $statusBaru = 'Menunggu WD2'; 
-        } elseif ($aksi === 'revisi') {
-            $statusBaru = 'Revisi';
-        } elseif ($aksi === 'tolak') {
-            $statusBaru = 'Ditolak'; // Gunakan status Ditolak
-        }
-        // Update status usulan
-        $stmt = $this->db->prepare("UPDATE usulan_kegiatan SET status_terkini = :status, kode_mak = :kode_mak WHERE id = :id");
-        $stmt->execute(['status' => $statusBaru, 'kode_mak' => $kode_mak, 'id' => $id]);
-        
-        // Log histori
-        $logStmt = $this->db->prepare("INSERT INTO log_histori_usulan (usulan_id, user_id, status_lama, status_baru, catatan) VALUES (:usulan_id, :user_id, 'Verifikasi', :status_baru, :catatan)");
-        $logStmt->execute(['usulan_id' => $id, 'user_id' => $userId, 'status_baru' => $statusBaru, 'catatan' => $catatan]);
-        
-        // Notifikasi ke pengusul
-        $usulan = $this->db->prepare("SELECT user_id, nama_kegiatan FROM usulan_kegiatan WHERE id = :id");
-        $usulan->execute(['id' => $id]);
-        $u = $usulan->fetch(PDO::FETCH_ASSOC);
-        $judul = 'Status Usulan Diperbarui';
-        $pesan = "Usulan '{$u['nama_kegiatan']}' statusnya menjadi $statusBaru.";
-        $link = "/usulan/detail?id=$id";
-        $notifStmt = $this->db->prepare("INSERT INTO notifikasi (user_id, judul, pesan, link) VALUES (:user_id, :judul, :pesan, :link)");
-        $notifStmt->execute([
-            'user_id' => $u['user_id'],
-            'judul' => $judul,
-            'pesan' => $pesan,
-            'link' => $link
-        ]);
-        
-        $_SESSION['toast'] = ['type' => 'success', 'msg' => 'Verifikasi berhasil disimpan!'];
-        header('Location: /verifikasi');
-        exit;
+        $_SESSION['toast'] = ['type' => 'success', 'msg' => 'Verifikasi Selesai.'];
+        header('Location: /verifikasi'); exit;
     }
 }
