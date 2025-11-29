@@ -112,10 +112,11 @@
                             $s3_active = $s === 'Menunggu PPK';
 
                             $s4_done = in_array($s, ['Pencairan', 'LPJ', 'Selesai']); 
-                            $s4_active = $s === 'Disetujui' || $s === 'Pencairan';
+                            $s4_active = $s === 'Disetujui' || $s === 'Pencairan'; // Tahap Pencairan
 
+                            // [FIX] Tambahkan Logika Tahap 5 (LPJ)
                             $s5_done = $s === 'Selesai';
-                            $s5_active = $s === 'LPJ' || $s === 'Pencairan'; 
+                            $s5_active = $s === 'LPJ'; // Tahap LPJ aktif setelah pencairan 
 
                             // Logic Overdue
                             $isLate = false;
