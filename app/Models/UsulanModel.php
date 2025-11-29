@@ -16,28 +16,22 @@ class UsulanModel
     private function buildWhereClause($filters, &$params)
     {
         $sql = " WHERE 1=1";
-
-        // Filter Khusus Pengusul (Hanya lihat data sendiri)
         if (!empty($filters['role']) && $filters['role'] === 'Pengusul' && !empty($filters['user_id'])) {
             $sql .= " AND u.user_id = :uid";
             $params['uid'] = $filters['user_id'];
         }
-        // Pencarian Global
         if (!empty($filters['search'])) {
             $sql .= " AND (u.nama_kegiatan LIKE :q OR us.username LIKE :q)";
             $params['q'] = "%" . $filters['search'] . "%";
         }
-        // Filter Status
         if (!empty($filters['status'])) {
             $sql .= " AND u.status_terkini = :status";
             $params['status'] = $filters['status'];
         }
-        // Filter Tanggal
         if (!empty($filters['date'])) {
             $sql .= " AND DATE(u.created_at) = :fdate";
             $params['fdate'] = $filters['date'];
         }
-
         return $sql;
     }
 
@@ -75,7 +69,6 @@ class UsulanModel
     public function getByStatus($statuses)
     {
         if (!is_array($statuses)) $statuses = [$statuses];
-        
         $placeholders = [];
         $params = [];
         foreach ($statuses as $k => $val) {
@@ -83,19 +76,13 @@ class UsulanModel
             $placeholders[] = $key;
             $params[$key] = $val;
         }
-        
-        $sql = "SELECT u.*, us.username 
-                FROM usulan_kegiatan u 
-                JOIN users us ON u.user_id = us.id 
-                WHERE u.status_terkini IN (" . implode(',', $placeholders) . ") 
-                ORDER BY u.updated_at DESC";
-
+        $sql = "SELECT u.*, us.username FROM usulan_kegiatan u JOIN users us ON u.user_id = us.id WHERE u.status_terkini IN (" . implode(',', $placeholders) . ") ORDER BY u.updated_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // --- DATA DETAIL & DOKUMEN ---
+    // --- DATA DETAIL ---
     public function findById($id)
     {
         $stmt = $this->db->prepare("SELECT * FROM usulan_kegiatan WHERE id = ?");
@@ -103,7 +90,6 @@ class UsulanModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // [BARU] Fitur Dokumen
     public function getDocuments($usulanId)
     {
         $stmt = $this->db->prepare("SELECT * FROM dokumen_pendukung WHERE usulan_id = ? ORDER BY uploaded_at DESC");
@@ -117,7 +103,7 @@ class UsulanModel
         return $stmt->execute([$usulanId, $jenis, $path]);
     }
 
-    // --- STATISTIK & TOOLS ---
+    // --- STATISTIK & EXECUTIVE REPORTING [UPDATED] ---
     public function getDashboardStats()
     {
         $sql = "SELECT 
@@ -126,6 +112,20 @@ class UsulanModel
                     (SELECT COALESCE(SUM(nominal_pencairan), 0) FROM usulan_kegiatan WHERE status_terkini IN ('Pencairan','LPJ','Selesai')) as dana_cair,
                     (SELECT COUNT(*) FROM usulan_kegiatan WHERE status_terkini='Draft') as draft";
         return $this->db->query($sql)->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // [BARU] Statistik Distribusi Anggaran per Kategori (Real Data)
+    public function getBudgetDistribution()
+    {
+        // Hanya hitung usulan yang sudah disetujui/cair (Komitmen Pagu)
+        $sql = "SELECT k.nama_kategori, COALESCE(SUM(r.total), 0) as total_anggaran
+                FROM rab_detail r
+                JOIN master_kategori_anggaran k ON r.kategori_id = k.id
+                JOIN usulan_kegiatan u ON r.usulan_id = u.id
+                WHERE u.status_terkini IN ('Disetujui', 'Pencairan', 'LPJ', 'Selesai')
+                GROUP BY k.id, k.nama_kategori
+                ORDER BY total_anggaran DESC";
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getUserStats($userId)
@@ -153,12 +153,7 @@ class UsulanModel
 
     public function cairkanDana($id, $tglCair, $tglLpj, $nominal)
     {
-        $sql = "UPDATE usulan_kegiatan 
-                SET status_terkini = 'Pencairan', 
-                    tgl_pencairan = :tc, 
-                    tgl_batas_lpj = :tl,
-                    nominal_pencairan = :nom 
-                WHERE id = :id";
+        $sql = "UPDATE usulan_kegiatan SET status_terkini = 'Pencairan', tgl_pencairan = :tc, tgl_batas_lpj = :tl, nominal_pencairan = :nom WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['tc' => $tglCair, 'tl' => $tglLpj, 'nom' => $nominal, 'id' => $id]);
     }
@@ -185,7 +180,6 @@ class UsulanModel
                 AND u.tgl_batas_lpj IS NOT NULL 
                 AND u.tgl_batas_lpj < CURDATE()
                 ORDER BY u.tgl_batas_lpj ASC";
-        
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 }
