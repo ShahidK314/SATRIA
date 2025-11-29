@@ -47,7 +47,7 @@
             </div>
         <?php else: ?>
 
-            <?php $isEditable = $isEditable ?? false; // FIX: tambahkan default isEditable ?>
+            <?php $isEditable = $isEditable ?? false; ?>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left border-collapse">
@@ -77,7 +77,7 @@
                             <th class="px-2 py-4 text-center w-24 border-l border-slate-200">
                                 <div class="flex flex-col items-center gap-1">
                                     <span class="material-icons text-slate-400 text-lg">payments</span>
-                                    <span>Tahap 3<br>(Pencairan)</span>
+                                    <span>Tahap 3<br>(Uang Muka)</span>
                                 </div>
                             </th>
                             <th class="px-2 py-4 text-center w-24 border-l border-slate-200">
@@ -94,31 +94,44 @@
                         <?php foreach ($usulan as $row): 
                             $s = $row['status_terkini'];
                             
-                            // Helper Function untuk Icon Checklist Logic
+                            // Helper Function: Logic Warna & Ikon
                             $check = function($isActive, $isDone) {
                                 if ($isDone) return '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600"><span class="material-icons text-sm font-bold">check</span></span>';
                                 if ($isActive) return '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 animate-pulse"><span class="material-icons text-sm">hourglass_empty</span></span>';
                                 return '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-300"><span class="material-icons text-sm">remove</span></span>';
                             };
 
-                            // Logic Mapping Status ke Tahapan (State Machine)
+                            // --- MAPPING STATUS KE MONITORING (Sesuai PDF) ---
+                            
+                            // 1. Validasi Verifikator
+                            // Selesai jika status sudah lewat dari 'Verifikasi' (misal: Disetujui Verifikator, Menunggu WD2, dll)
                             $s1_done = !in_array($s, ['Draft', 'Revisi', 'Verifikasi', 'Ditolak']);
                             $s1_active = $s === 'Verifikasi';
 
-                            $s2_done = !in_array($s, ['Draft', 'Revisi', 'Verifikasi', 'Menunggu WD2', 'Ditolak']);
-                            $s2_active = $s === 'Menunggu WD2';
+                            // 2. Tahap 1 (ACC WD2)
+                            // Aktif jika: Sedang lengkapi berkas ('Disetujui Verifikator') ATAU Sedang di meja WD2 ('Menunggu WD2')
+                            // Selesai jika: Sudah lewat (Menunggu PPK, dst)
+                            $s2_done = !in_array($s, ['Draft', 'Revisi', 'Verifikasi', 'Disetujui Verifikator', 'Menunggu WD2', 'Ditolak']);
+                            $s2_active = in_array($s, ['Disetujui Verifikator', 'Menunggu WD2']);
 
-                            $s3_done = !in_array($s, ['Draft', 'Revisi', 'Verifikasi', 'Menunggu WD2', 'Menunggu PPK', 'Ditolak']);
+                            // 3. Tahap 2 (ACC PPK)
+                            // Aktif jika: Menunggu PPK
+                            $s3_done = !in_array($s, ['Draft', 'Revisi', 'Verifikasi', 'Disetujui Verifikator', 'Menunggu WD2', 'Menunggu PPK', 'Ditolak']);
                             $s3_active = $s === 'Menunggu PPK';
 
-                            $s4_done = in_array($s, ['Pencairan', 'LPJ', 'Selesai']); 
-                            $s4_active = $s === 'Disetujui' || $s === 'Pencairan'; // Tahap Pencairan
+                            // 4. Tahap 3 (Uang Muka / Pencairan)
+                            // Aktif jika: Disetujui (oleh PPK) menunggu Bendahara
+                            // Selesai jika: Sudah 'Pencairan', 'LPJ', atau 'Selesai'
+                            $s4_done = in_array($s, ['Pencairan', 'LPJ', 'Selesai']);
+                            $s4_active = $s === 'Disetujui';
 
-                            // [FIX] Tambahkan Logika Tahap 5 (LPJ)
+                            // 5. Tahap 4 (LPJ)
+                            // Aktif jika: Dana sudah cair ('Pencairan') atau sedang lapor ('LPJ')
+                            // Selesai jika: 'Selesai'
                             $s5_done = $s === 'Selesai';
-                            $s5_active = $s === 'LPJ'; // Tahap LPJ aktif setelah pencairan 
+                            $s5_active = in_array($s, ['Pencairan', 'LPJ']); 
 
-                            // Logic Overdue
+                            // Overdue Check
                             $isLate = false;
                             if (!empty($row['tgl_batas_lpj']) && $s !== 'Selesai') {
                                 if (new DateTime() > new DateTime($row['tgl_batas_lpj'])) $isLate = true;
@@ -152,7 +165,7 @@
                                 <?php elseif($isLate): ?>
                                     <span class="inline-flex px-2 py-1 rounded text-[10px] font-bold bg-rose-600 text-white animate-pulse">TERLAMBAT</span>
                                 <?php else: ?>
-                                    <span class="inline-flex px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200"><?php echo $s; ?></span>
+                                    <span class="inline-flex px-2 py-1 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap"><?php echo $s; ?></span>
                                 <?php endif; ?>
                             </td>
 
@@ -163,35 +176,34 @@
                                     </a>
 
                                     <?php if ($isEditable): ?>
-                                        <a href="/usulan/edit?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all" title="Edit Usulan">
-                                            <span class="material-icons text-sm">edit</span>
-                                        </a>
-
-                                        <?php if ($s === 'Draft'): ?>
-                                        <form action="/usulan/ajukan?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('Yakin ingin mengajukan usulan ini ke Verifikator?');">
-                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all" title="Ajukan ke Verifikator">
-                                                <span class="material-icons text-sm">send</span>
-                                            </button>
-                                        </form>
-                                        <?php endif; ?>
-
+                                        
                                         <?php if ($s === 'Disetujui Verifikator'): ?>
-                                        <a href="/usulan/lengkapi?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center px-3 py-1.5 bg-violet-600 text-white text-[10px] font-bold rounded hover:bg-violet-700 transition-all" title="Upload Surat & Ajukan">
-                                            <span class="material-icons text-xs mr-1">upload_file</span> Ajukan WD2
-                                                </a>
-                                            <?php endif; ?>
+                                        <a href="/usulan/lengkapi?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-all" title="Upload Surat">
+                                            <span class="material-icons text-sm">upload_file</span>
+                                        </a>
+                                        <?php endif; ?>
 
                                         <?php if (in_array($s, ['Draft', 'Revisi'])): ?>
-                                            <a href="/usulan/edit?id=<?php echo $row['id']; ?>" class="..."><span class="material-icons text-sm">edit</span></a>
+                                            <a href="/usulan/edit?id=<?php echo $row['id']; ?>" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all" title="Edit">
+                                                <span class="material-icons text-sm">edit</span>
+                                            </a>
+                                            
+                                            <?php if($s === 'Draft'): ?>
+                                            <form action="/usulan/ajukan?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('Ajukan ke Verifikator?');">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all" title="Kirim">
+                                                    <span class="material-icons text-sm">send</span>
+                                                </button>
+                                            </form>
+                                            <?php endif; ?>
+
+                                            <form action="/usulan/delete?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('Hapus permanen?');">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="Hapus">
+                                                    <span class="material-icons text-sm">delete</span>
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
-                                        
-                                        <form action="/usulan/delete?id=<?php echo $row['id']; ?>" method="POST" class="inline" onsubmit="return confirm('PERINGATAN: Data yang dihapus tidak dapat dikembalikan.\n\nApakah Anda yakin ingin menghapus usulan ini?');">
-                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                            <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="Hapus Permanen">
-                                                <span class="material-icons text-sm">delete</span>
-                                            </button>
-                                        </form>
                                     <?php endif; ?>
                                 </div>
                             </td>
