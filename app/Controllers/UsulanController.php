@@ -252,4 +252,63 @@ class UsulanController
         
         $this->usulanModel->addDocument($id, $jenis, "/uploads/$name");
     }
+
+    // --- FITUR TAMBAHAN: UPLOAD LPJ & SUBMIT ---
+    public function uploadDokumen($id)
+    {
+        $this->ensureLogin();
+        $this->validateCsrf();
+        
+        $usulan = $this->usulanModel->findById($id);
+        if ($usulan['user_id'] != $_SESSION['user_id']) $this->redirectWithMsg('/monitoring', 'error', 'Akses ditolak.');
+
+        // Validasi Status: Upload hanya boleh saat 'Disetujui Verifikator' (Surat) atau 'Pencairan'/'Revisi' (LPJ)
+        $allowedStatus = ['Disetujui Verifikator', 'Pencairan', 'LPJ']; // LPJ boleh upload ulang jika status masih LPJ (sebelum disetujui)
+        if (!in_array($usulan['status_terkini'], $allowedStatus)) {
+             $this->redirectWithMsg("/usulan/detail?id=$id", 'error', 'Tidak dapat upload dokumen pada status ini.');
+        }
+
+        $jenis = $_POST['jenis_dokumen'] ?? 'LPJ';
+        
+        if (empty($_FILES['dokumen']['name'])) {
+            $this->redirectWithMsg("/usulan/detail?id=$id", 'error', 'Pilih file terlebih dahulu.');
+        }
+
+        try {
+            $this->handleUpload($id, $jenis, $_FILES['dokumen']);
+            $this->redirectWithMsg("/usulan/detail?id=$id", 'success', "$jenis berhasil diunggah.");
+        } catch (Exception $e) {
+            $this->redirectWithMsg("/usulan/detail?id=$id", 'error', $e->getMessage());
+        }
+    }
+
+    public function submitLpj($id)
+    {
+        $this->ensureLogin();
+        $this->validateCsrf();
+
+        $usulan = $this->usulanModel->findById($id);
+        if ($usulan['user_id'] != $_SESSION['user_id']) $this->redirectWithMsg('/monitoring', 'error', 'Akses ditolak.');
+
+        if ($usulan['status_terkini'] !== 'Pencairan') {
+            $this->redirectWithMsg("/usulan/detail?id=$id", 'error', 'Status kegiatan belum masuk tahap pelaporan.');
+        }
+
+        // Cek apakah ada dokumen LPJ
+        $docs = $this->usulanModel->getDocuments($id);
+        $hasLpj = false;
+        foreach($docs as $d) {
+            if($d['jenis_dokumen'] === 'LPJ') { $hasLpj = true; break; }
+        }
+
+        if (!$hasLpj) {
+            $this->redirectWithMsg("/usulan/detail?id=$id", 'error', 'Harap upload minimal satu dokumen LPJ sebelum submit.');
+        }
+
+        // Update Status
+        $this->db->prepare("UPDATE usulan_kegiatan SET status_terkini = 'LPJ', updated_at = NOW() WHERE id = ?")->execute([$id]);
+        $this->usulanModel->addLog($id, $_SESSION['user_id'], 'Pencairan', 'LPJ', 'Melaporkan pertanggungjawaban kegiatan.');
+
+        $this->redirectWithMsg('/monitoring', 'success', 'LPJ Berhasil dikirim ke Bendahara!');
+    }
 }

@@ -128,6 +128,10 @@ if ($uri === '/' || $uri === '/index.php') {
     $ctl = new UsulanController($db); $ctl->lengkapi(getId());
 } elseif ($uri === '/usulan/proses-lengkapi') {
     $ctl = new UsulanController($db); $ctl->prosesLengkapi(getId());
+} elseif ($uri === '/usulan/upload-dokumen') {
+    $ctl = new UsulanController($db); $ctl->uploadDokumen(getId());
+} elseif ($uri === '/usulan/submit-lpj') {
+    $ctl = new UsulanController($db); $ctl->submitLpj(getId());
 
 // VERIFIKASI
 } elseif ($uri === '/verifikasi') {

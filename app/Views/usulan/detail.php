@@ -94,6 +94,40 @@
             </div>
             <?php endif; ?>
 
+            <?php if (
+                $_SESSION['role'] === 'Pengusul' && 
+                $usulan['user_id'] == $_SESSION['user_id'] && 
+                $usulan['status_terkini'] === 'Pencairan'
+            ): ?>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mt-6">
+                <h3 class="font-bold text-indigo-900 mb-4 flex items-center">
+                    <span class="material-icons mr-2">upload_file</span> Upload Laporan (LPJ)
+                </h3>
+                
+                <form action="/usulan/upload-dokumen?id=<?php echo $usulan['id']; ?>" method="POST" enctype="multipart/form-data" class="mb-4 flex gap-3 items-end">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    <input type="hidden" name="jenis_dokumen" value="LPJ">
+                    
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-indigo-400 uppercase mb-1">Pilih File (PDF/Bukti)</label>
+                        <input type="file" name="dokumen" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-white file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer bg-white border border-indigo-200 rounded-lg">
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 shadow-lg transition-all">
+                        Upload
+                    </button>
+                </form>
+
+                <div class="p-3 bg-white rounded-xl border border-indigo-100 text-center">
+                    <p class="text-xs text-slate-500 mb-3">Sudah lengkap? Kirim ke Bendahara untuk diperiksa.</p>
+                    <form action="/usulan/submit-lpj?id=<?php echo $usulan['id']; ?>" method="POST" onsubmit="return confirm('Yakin dokumen LPJ sudah lengkap?');">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                        <button type="submit" class="w-full py-3 bg-indigo-800 text-white font-bold rounded-lg hover:bg-indigo-900 shadow-md transition-all flex justify-center items-center">
+                            <span class="material-icons text-sm mr-2">send</span> Kirim LPJ Final
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <?php endif; ?>
             <?php if(!empty($docs)): ?>
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mt-6">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-6 flex items-center border-b border-slate-100 pb-4">
