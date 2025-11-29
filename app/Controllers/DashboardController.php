@@ -71,7 +71,14 @@ class DashboardController
             case 'PPK':
                 require __DIR__ . '/../Views/dashboard/ppk.php'; break;
             case 'Bendahara':
-                require __DIR__ . '/../Views/dashboard/bendahara.php'; break;
+                // [ELITE UPGRADE] Hitung Antrian Tugas Bendahara
+                // 1. Siap Cair (Status: Disetujui)
+                $countCair = $usulanModel->countAllWithUser(['status' => 'Disetujui']);
+                // 2. Tunggu Verifikasi LPJ (Status: LPJ)
+                $countLPJ = $usulanModel->countAllWithUser(['status' => 'LPJ']);
+                
+                require __DIR__ . '/../Views/dashboard/bendahara.php'; 
+                break;
             case 'Direktur':
                 require __DIR__ . '/../Views/dashboard/direktur.php'; break;
             default:
