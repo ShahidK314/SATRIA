@@ -9,23 +9,23 @@ if (!function_exists('formatRupiah')) {
 }
 ?>
 
-<div class="m-5">
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Pengajuan LPJ</h1>
-        <p class="text-slate-500 mt-1">Daftar kegiatan yang telah dicairkan dan memerlukan Laporan Pertanggungjawaban.</p>
+<div class="m-4 md:m-5">
+    <div class="mb-6 md:mb-8 text-center md:text-left">
+        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Pengajuan LPJ</h1>
+        <p class="text-slate-500 mt-1 text-sm md:text-base">Daftar kegiatan yang telah dicairkan dan memerlukan Laporan Pertanggungjawaban.</p>
     </div>
 
     <?php if (empty($lpjList)): ?>
-        <div class="bg-white rounded-xl p-12 text-center shadow-sm border border-slate-200">
+        <div class="bg-white rounded-xl p-8 md:p-12 text-center shadow-sm border border-slate-200">
             <span class="material-icons text-slate-300 text-6xl mb-4">receipt_long</span>
             <h3 class="text-lg font-bold text-slate-700">Belum Ada Tagihan LPJ</h3>
-            <p class="text-slate-500">Kegiatan Anda belum dicairkan oleh Bendahara.</p>
+            <p class="text-slate-500 text-sm">Kegiatan Anda belum dicairkan oleh Bendahara.</p>
         </div>
     <?php else: ?>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left whitespace-nowrap">
-                    <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-xs border-b border-slate-200">
+            <div class="overflow-x-auto w-full custom-scrollbar">
+                <table class="w-full text-sm text-left whitespace-nowrap min-w-[800px]">
+                    <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] border-b border-slate-200">
                         <tr>
                             <th class="px-6 py-4">Nama Kegiatan</th>
                             <th class="px-6 py-4 text-right">Total Cair (Akumulasi)</th>
@@ -41,19 +41,21 @@ if (!function_exists('formatRupiah')) {
                             $deadlineClass = $isOverdue ? 'text-rose-600 font-bold' : 'text-slate-600';
                         ?>
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 font-bold text-slate-800">
-                                <?php echo htmlspecialchars($row['nama_kegiatan']); ?>
-                                <?php if($row['status_terkini'] === 'Revisi'): ?><span class="text-rose-600 text-xs ml-2">(Revisi)</span><?php endif; ?>
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-slate-800 whitespace-normal line-clamp-2 md:line-clamp-none">
+                                    <?php echo htmlspecialchars($row['nama_kegiatan']); ?>
+                                </span>
+                                <?php if($row['status_terkini'] === 'Revisi'): ?><span class="text-rose-600 text-xs md:ml-2 block md:inline mt-1 md:mt-0">(Revisi)</span><?php endif; ?>
                             </td>
                             <td class="px-6 py-4 text-right text-emerald-600 font-bold font-mono">
                                 <?php echo formatRupiah($row['nominal_dicairkan']); ?>
                             </td>
                             <td class="px-6 py-4 text-center <?php echo $deadlineClass; ?>">
                                 <?php echo date('d M Y', strtotime($row['tanggal_batas_lpj'])); ?>
-                                <?php if($isOverdue && $row['status_terkini'] !== 'Disetujui'): ?><div class="text-[10px] text-rose-600 font-bold">TERLAMBAT</div><?php endif; ?>
+                                <?php if($isOverdue && $row['status_terkini'] !== 'Disetujui'): ?><div class="text-[10px] text-rose-600 font-bold mt-1">TERLAMBAT</div><?php endif; ?>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 rounded text-xs font-bold <?php echo $statusClass; ?>">
+                                <span class="px-3 py-1 rounded text-[10px] font-bold border border-slate-100 <?php echo $statusClass; ?>">
                                     <?php echo htmlspecialchars($row['status_terkini']); ?>
                                 </span>
                             </td>
@@ -63,7 +65,7 @@ if (!function_exists('formatRupiah')) {
                                         <span class="material-icons text-sm">verified</span> Selesai
                                     </span>
                                 <?php else: ?>
-                                    <a href="/lpj/upload/detail?id=<?php echo $row['id']; ?>" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-all text-xs flex items-center justify-end gap-1 ml-auto w-fit">
+                                    <a href="/lpj/upload/detail?id=<?php echo $row['id']; ?>" class="inline-flex px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-all text-xs items-center justify-center gap-1 shadow-sm">
                                         <span class="material-icons text-xs">edit</span> Ajukan LPJ
                                     </a>
                                 <?php endif; ?>

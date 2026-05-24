@@ -69,12 +69,12 @@ elseif (strpos($uri, '/lpj') !== false) $pageTitle = 'Verifikasi LPJ';
 <body class="bg-[#F8FAFC] text-slate-800 antialiased h-full selection:bg-blue-100 selection:text-blue-900">
 
 <?php if (isset($_SESSION['toast'])): ?>
-<div id="toast-notification" class="fixed top-5 right-5 z-[100] flex items-center w-full max-w-xs p-4 space-x-3 text-gray-500 bg-white rounded-xl shadow-2xl border-l-4 <?php echo ($_SESSION['toast']['type'] == 'success') ? 'border-emerald-500' : 'border-rose-500'; ?> animate-fade-in-down" role="alert">
+<div id="toast-notification" class="fixed top-4 left-4 right-4 sm:left-auto sm:right-5 sm:top-5 z-[100] flex items-center w-auto sm:w-full sm:max-w-sm p-4 space-x-3 text-gray-500 bg-white rounded-xl shadow-2xl border-l-4 <?php echo ($_SESSION['toast']['type'] == 'success') ? 'border-emerald-500' : 'border-rose-500'; ?> animate-fade-in-down" role="alert">
     <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg <?php echo ($_SESSION['toast']['type'] == 'success') ? 'text-emerald-500 bg-emerald-100' : 'text-rose-500 bg-rose-100'; ?>">
         <span class="material-icons text-lg"><?php echo ($_SESSION['toast']['type'] == 'success') ? 'check_circle' : 'error'; ?></span>
     </div>
-    <div class="ml-3 text-sm font-semibold text-slate-800"><?php echo $_SESSION['toast']['msg']; ?></div>
-    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close" onclick="this.parentElement.remove()">
+    <div class="ml-3 text-sm font-semibold text-slate-800 leading-tight"><?php echo $_SESSION['toast']['msg']; ?></div>
+    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex flex-shrink-0 h-8 w-8" aria-label="Close" onclick="this.parentElement.remove()">
         <span class="material-icons text-sm">close</span>
     </button>
 </div>

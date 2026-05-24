@@ -4,37 +4,37 @@ include __DIR__.'/../partials/sidebar.php';
 $isEditable = ($_SESSION['role'] === 'Admin');
 ?>
 
-<div class="m-5">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div class="m-4 md:m-5">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
         
         <div>
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Pengguna</h1>
-            <p class="text-slate-500 mt-1">Kelola akun pengguna, peran, dan status aktivasi.</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Pengguna</h1>
+            <p class="text-slate-500 mt-1 text-sm md:text-base">Kelola akun pengguna, peran, dan status aktivasi.</p>
             <?php if (!$isEditable): ?>
-                <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-700 p-3 mt-3 text-sm rounded-r-lg inline-block">
+                <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-700 p-3 mt-3 text-xs md:text-sm rounded-r-lg inline-block">
                     <strong>Mode Read Only:</strong> Anda hanya dapat melihat data pengguna.
                 </div>
             <?php endif; ?>
         </div>
 
         <?php if ($isEditable): ?>
-            <div>
-                <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-sm shadow-md">
-                    <span class="material-icons text-sm mr-2">person_add</span> Tambah Pengguna Baru
+            <div class="w-full md:w-auto">
+                <button onclick="openAddModal()" class="w-full md:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors text-sm shadow-sm">
+                    <span class="material-icons text-sm mr-2">person_add</span> Tambah Baru
                 </button>
             </div>
         <?php endif; ?>
     </div>
 
     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div class="md:col-span-2">
-                <label for="search" class="block text-xs font-bold text-slate-500 uppercase mb-1">Cari Nama/Username/Email</label>
-                <input type="text" id="search" name="search" placeholder="Masukkan nama, username, atau email..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 items-end">
+            <div class="sm:col-span-2">
+                <label for="search" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Cari Nama/Username/Email</label>
+                <input type="text" id="search" name="search" placeholder="Masukkan kata kunci..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-blue-500 focus:border-blue-500 shadow-sm">
             </div>
-            <div class="md:col-span-1">
-                <label for="jurusan" class="block text-xs font-bold text-slate-500 uppercase mb-1">Filter Jurusan</label>
-                <select id="jurusan" name="jurusan" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
+            <div class="sm:col-span-1">
+                <label for="jurusan" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Filter Jurusan</label>
+                <select id="jurusan" name="jurusan" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 outline-none focus:ring-blue-500 focus:border-blue-500 shadow-sm truncate">
                     <option value="">-- Semua Jurusan --</option>
                     <?php foreach ($jurusan as $j): ?>
                         <option value="<?php echo $j['id']; ?>" <?php echo (($_GET['jurusan'] ?? '') == $j['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($j['nama_jurusan']); ?></option>
@@ -42,69 +42,69 @@ $isEditable = ($_SESSION['role'] === 'Admin');
                 </select>
             </div>
             
-            <div class="md:col-span-1">
-                <button type="submit" class="w-full py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900 transition-all text-sm shadow-md">Filter</button>
+            <div class="sm:col-span-1">
+                <button type="submit" class="w-full py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-900 transition-all text-sm shadow-sm">Filter</button>
             </div>
         </form>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <?php if (empty($users)): ?>
-            <div class="p-12 text-center">
-                <span class="material-icons text-slate-300 text-5xl mb-2">person_search</span>
-                <h3 class="text-lg font-bold text-slate-700">Tidak ada Pengguna Ditemukan</h3>
+            <div class="p-8 md:p-12 text-center">
+                <span class="material-icons text-slate-300 text-5xl md:text-6xl mb-4">person_search</span>
+                <h3 class="text-base md:text-lg font-bold text-slate-700">Tidak ada Pengguna Ditemukan</h3>
             </div>
         <?php else: ?>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left border-collapse">
-                    <thead class="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] border-b border-slate-200">
+            <div class="overflow-x-auto w-full custom-scrollbar">
+                <table class="w-full text-sm text-left border-collapse min-w-[900px]">
+                    <thead class="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] md:text-xs border-b border-slate-200">
                         <tr>
-                            <th class="px-6 py-4 w-12">ID</th>
-                            <th class="px-6 py-4 w-40">Nama & Username</th>
-                            <th class="px-6 py-4 w-32">Role</th>
-                            <th class="px-6 py-4 min-w-[200px]">Unit/Jurusan</th>
-                            <th class="px-6 py-4 w-32">Email</th>
-                            <th class="px-6 py-4 w-24 text-center">Status</th>
+                            <th class="px-4 md:px-6 py-4 w-12">ID</th>
+                            <th class="px-4 md:px-6 py-4 w-48">Nama & Username</th>
+                            <th class="px-4 md:px-6 py-4 w-32">Role</th>
+                            <th class="px-4 md:px-6 py-4 min-w-[150px]">Unit/Jurusan</th>
+                            <th class="px-4 md:px-6 py-4 w-32">Email</th>
+                            <th class="px-4 md:px-6 py-4 w-24 text-center">Status</th>
                             <?php if ($isEditable): ?>
-                                <th class="px-6 py-4 w-24 text-right">Aksi</th>
+                                <th class="px-4 md:px-6 py-4 w-24 text-right">Aksi</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($users as $user): ?>
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-3 font-mono text-xs text-slate-400"><?php echo $user['id']; ?></td>
-                            <td class="px-6 py-3">
-                                <p class="font-bold text-slate-800"><?php echo htmlspecialchars($user['nama']); ?></p>
-                                <p class="text-xs text-slate-500">@<?php echo htmlspecialchars($user['username']); ?></p>
+                            <td class="px-4 md:px-6 py-3 font-mono text-xs text-slate-400"><?php echo $user['id']; ?></td>
+                            <td class="px-4 md:px-6 py-3">
+                                <p class="font-bold text-slate-800 whitespace-normal leading-snug"><?php echo htmlspecialchars($user['nama']); ?></p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">@<?php echo htmlspecialchars($user['username']); ?></p>
                             </td>
-                            <td class="px-6 py-3">
-                                <span class="px-2 py-1 rounded text-xs font-bold <?php echo getRoleClass($user['role']); ?>">
+                            <td class="px-4 md:px-6 py-3">
+                                <span class="px-2 py-1 rounded-full text-[10px] uppercase font-bold border <?php echo getRoleClass($user['role']); ?>">
                                     <?php echo htmlspecialchars($user['role']); ?>
                                 </span>
                             </td>
-                            <td class="px-6 py-3 text-slate-600">
+                            <td class="px-4 md:px-6 py-3 text-slate-600 text-xs">
                                 <?php echo htmlspecialchars($user['nama_jurusan'] ?: '-'); ?>
                             </td>
-                            <td class="px-6 py-3 text-xs text-slate-500">
+                            <td class="px-4 md:px-6 py-3 text-xs text-slate-500">
                                 <?php echo htmlspecialchars($user['email']); ?>
                             </td>
-                            <td class="px-6 py-3 text-center">
-                                <span class="px-2 py-1 rounded text-xs font-bold <?php echo $user['is_active'] ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'; ?>">
+                            <td class="px-4 md:px-6 py-3 text-center">
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase <?php echo $user['is_active'] ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-rose-100 text-rose-700 border-rose-200'; ?>">
                                     <?php echo $user['is_active'] ? 'Aktif' : 'Nonaktif'; ?>
                                 </span>
                             </td>
                             <?php if ($isEditable): ?>
-                                <td class="px-6 py-3 text-right">
+                                <td class="px-4 md:px-6 py-3 text-right">
                                     <div class="flex justify-end gap-2">
-                                        <button onclick="openEditModal(<?php echo htmlspecialchars(json_encode($user)); ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all" title="Edit User">
+                                        <button onclick="openEditModal(<?php echo htmlspecialchars(json_encode($user)); ?>)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all shadow-sm" title="Edit User">
                                             <span class="material-icons text-sm">edit</span>
                                         </button>
                                         <form action="/users/toggle-status" method="POST" onsubmit="return confirm('Yakin ingin <?php echo $user['is_active'] ? 'menonaktifkan' : 'mengaktifkan'; ?> user <?php echo htmlspecialchars($user['username']); ?>?');">
                                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
                                             <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
                                             <input type="hidden" name="current_status" value="<?php echo $user['is_active']; ?>">
-                                            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 <?php echo $user['is_active'] ? 'text-rose-600 hover:bg-rose-50' : 'text-emerald-600 hover:bg-emerald-50'; ?> transition-all" title="<?php echo $user['is_active'] ? 'Nonaktifkan' : 'Aktifkan'; ?>">
+                                            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 shadow-sm <?php echo $user['is_active'] ? 'text-rose-600 hover:bg-rose-50' : 'text-emerald-600 hover:bg-emerald-50'; ?> transition-all" title="<?php echo $user['is_active'] ? 'Nonaktifkan' : 'Aktifkan'; ?>">
                                                 <span class="material-icons text-sm"><?php echo $user['is_active'] ? 'block' : 'check_circle'; ?></span>
                                             </button>
                                         </form>
@@ -123,50 +123,53 @@ $isEditable = ($_SESSION['role'] === 'Admin');
 <?php 
 function getRoleClass($role) {
     return match($role) {
-        'Admin' => 'bg-slate-800 text-white',
-        'Pengusul' => 'bg-blue-100 text-blue-700',
-        'Verifikator' => 'bg-emerald-100 text-emerald-700',
-        'PPK' => 'bg-violet-100 text-violet-700',
-        'WD2' => 'bg-indigo-100 text-indigo-700',
-        'Bendahara' => 'bg-amber-100 text-amber-700',
-        'Direktur' => 'bg-red-100 text-red-700',
-        default => 'bg-gray-100 text-gray-700',
+        'Admin' => 'bg-slate-800 text-white border-slate-900',
+        'Pengusul' => 'bg-blue-50 text-blue-700 border-blue-200',
+        'Verifikator' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'PPK' => 'bg-violet-50 text-violet-700 border-violet-200',
+        'WD2' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'Bendahara' => 'bg-amber-50 text-amber-700 border-amber-200',
+        'Direktur' => 'bg-red-50 text-red-700 border-red-200',
+        default => 'bg-gray-50 text-gray-700 border-gray-200',
     };
 }
 ?>
 
 <?php if ($isEditable): ?>
-<div id="modalAddUser" class="fixed inset-0 bg-slate-900/50 hidden flex items-center justify-center z-[100]">
-    <div class="bg-white rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
-        <div class="p-6 border-b border-slate-100">
-            <h3 class="text-xl font-bold text-slate-800">Tambah Pengguna Baru</h3>
+<div id="modalAddUser" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-[100] px-4 py-6">
+    <div class="bg-white rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-full overflow-hidden">
+        <div class="p-4 md:p-6 border-b border-slate-100 shrink-0">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg md:text-xl font-bold text-slate-800">Tambah Pengguna Baru</h3>
+                <button type="button" onclick="closeAddModal()" class="text-slate-400 hover:text-rose-600"><span class="material-icons">close</span></button>
+            </div>
         </div>
-        <form id="formAddUser" action="/users/create" method="POST" class="p-6" onsubmit="submitAddUser(event)">
+        <form id="formAddUser" action="/users/create" method="POST" class="p-4 md:p-6 overflow-y-auto custom-scrollbar" onsubmit="submitAddUser(event)">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
             
             <div class="mb-4">
                 <label for="add_nama" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                <input type="text" id="add_nama" name="nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Nama Lengkap Pengguna">
+                <input type="text" id="add_nama" name="nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 outline-none" placeholder="Nama Lengkap Pengguna">
             </div>
             
             <div class="mb-4">
                 <label for="add_username" class="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                <input type="text" id="add_username" name="username" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Username">
+                <input type="text" id="add_username" name="username" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 outline-none" placeholder="Username (Tanpa Spasi)">
             </div>
             
             <div class="mb-4">
                 <label for="add_email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" id="add_email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" placeholder="email@pnj.ac.id">
+                <input type="email" id="add_email" name="email" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 outline-none" placeholder="email@pnj.ac.id">
             </div>
             
             <div class="mb-4">
                 <label for="add_password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                <input type="password" id="add_password" name="password" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Minimal 8 karakter">
+                <input type="password" id="add_password" name="password" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 outline-none" placeholder="Minimal 8 karakter">
             </div>
             
             <div class="mb-4">
                 <label for="add_role" class="block text-sm font-medium text-slate-700 mb-1">Role</label>
-                <select id="add_role" name="role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" onchange="toggleJurusan(this.value, 'add')">
+                <select id="add_role" name="role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 outline-none" onchange="toggleJurusan(this.value, 'add')">
                     <?php 
                     $allowedRoles = ['Pengusul', 'Verifikator', 'WD2', 'PPK', 'Bendahara', 'Admin', 'Direktur'];
                     foreach ($allowedRoles as $role): ?>
@@ -176,8 +179,8 @@ function getRoleClass($role) {
             </div>
             
             <div id="jurusan-field-add" class="mb-4 hidden">
-                <label for="add_jurusan_id" class="block text-sm font-medium text-slate-700 mb-1">Jurusan (Untuk Pengusul)</label>
-                <select id="add_jurusan_id" name="jurusan_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm">
+                <label for="add_jurusan_id" class="block text-sm font-medium text-slate-700 mb-1">Jurusan (Wajib untuk Pengusul)</label>
+                <select id="add_jurusan_id" name="jurusan_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 outline-none">
                     <option value="">-- Pilih Jurusan --</option>
                     <?php foreach ($jurusan as $j): ?>
                         <option value="<?php echo $j['id']; ?>"><?php echo htmlspecialchars($j['nama_jurusan']); ?></option>
@@ -185,50 +188,55 @@ function getRoleClass($role) {
                 </select>
             </div>
 
-            <div class="mb-4 pt-2 border-t border-slate-100">
-                <label class="block text-sm font-medium text-slate-700 mb-1">Kode Keamanan (Captcha) *</label>
-                <div class="flex items-center gap-3">
-                    <div class="w-2/5 flex-shrink-0 border-2 border-slate-300 rounded-lg overflow-hidden bg-white flex items-center justify-center">
+            <div class="mb-2 pt-4 border-t border-slate-100">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Kode Keamanan (Captcha) *</label>
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <div class="w-full sm:w-2/5 flex-shrink-0 border border-slate-300 rounded-lg overflow-hidden bg-white flex items-center justify-center p-1">
                         <img id="captchaImage" src="/captcha.php?t=<?php echo time(); ?>" alt="Captcha Code" onclick="refreshCaptcha()" class="w-full h-10 object-contain cursor-pointer" onerror="handleCaptchaError(this)">
                     </div>
-                    <input type="text" id="add_captcha" name="captcha" required class="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm uppercase" placeholder="Masukkan kode" autocomplete="off">
-                    <button type="button" onclick="refreshCaptcha()" class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-blue-600 hover:bg-slate-200 transition-colors" title="Refresh Captcha">
-                        <span class="material-icons text-lg">refresh</span>
-                    </button>
+                    <div class="w-full flex gap-2">
+                        <input type="text" id="add_captcha" name="captcha" required class="flex-1 w-full px-4 py-2 border border-slate-300 rounded-lg text-sm uppercase focus:border-blue-500 focus:ring-blue-500 outline-none" placeholder="Ketik kode di kiri" autocomplete="off">
+                        <button type="button" onclick="refreshCaptcha()" class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg bg-slate-100 text-blue-600 hover:bg-slate-200 transition-colors" title="Refresh Captcha">
+                            <span class="material-icons text-lg">refresh</span>
+                        </button>
+                    </div>
                 </div>
-                <p id="captchaErrorMsg" class="text-xs text-rose-600 mt-1 hidden font-bold"></p>
+                <p id="captchaErrorMsg" class="text-xs text-rose-600 mt-2 hidden font-bold"></p>
             </div>
             
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 text-sm">Batal</button>
-                <button type="submit" id="btnSubmitAdd" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 text-sm flex items-center">Simpan</button>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeAddModal()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 text-sm transition-colors">Batal</button>
+                <button type="submit" id="btnSubmitAdd" class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 text-sm shadow-md flex items-center justify-center transition-colors">Simpan Pengguna</button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="modalEditUser" class="fixed inset-0 bg-slate-900/50 hidden flex items-center justify-center z-[100]">
-    <div class="bg-white rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
-        <div class="p-6 border-b border-slate-100">
-            <h3 class="text-xl font-bold text-slate-800">Edit Pengguna: <span id="edit_username_display"></span></h3>
+<div id="modalEditUser" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-[100] px-4 py-6">
+    <div class="bg-white rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-full overflow-hidden">
+        <div class="p-4 md:p-6 border-b border-slate-100 shrink-0">
+             <div class="flex justify-between items-center">
+                <h3 class="text-lg md:text-xl font-bold text-slate-800">Edit Pengguna: <span id="edit_username_display" class="text-blue-600"></span></h3>
+                <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-rose-600"><span class="material-icons">close</span></button>
+            </div>
         </div>
-        <form action="/users/update" method="POST" class="p-6">
+        <form action="/users/update" method="POST" class="p-4 md:p-6 overflow-y-auto custom-scrollbar">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
             <input type="hidden" id="edit_id" name="id">
             
             <div class="mb-4">
                 <label for="edit_nama" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                <input type="text" id="edit_nama" name="nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Nama Lengkap">
+                <input type="text" id="edit_nama" name="nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 outline-none" placeholder="Nama Lengkap">
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" id="edit_email" readonly class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm bg-slate-100 text-slate-500">
+                <input type="email" id="edit_email" readonly class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 text-slate-500 cursor-not-allowed">
             </div>
             
             <div class="mb-4">
                 <label for="edit_role" class="block text-sm font-medium text-slate-700 mb-1">Role</label>
-                <select id="edit_role" name="role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" onchange="toggleJurusan(this.value, 'edit')">
+                <select id="edit_role" name="role" required class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 outline-none" onchange="toggleJurusan(this.value, 'edit')">
                     <?php foreach ($allowedRoles as $role): ?>
                         <option value="<?php echo $role; ?>"><?php echo $role; ?></option>
                     <?php endforeach; ?>
@@ -237,7 +245,7 @@ function getRoleClass($role) {
             
             <div id="jurusan-field-edit" class="mb-4 hidden">
                 <label for="edit_jurusan_id" class="block text-sm font-medium text-slate-700 mb-1">Jurusan (Untuk Pengusul)</label>
-                <select id="edit_jurusan_id" name="jurusan_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm">
+                <select id="edit_jurusan_id" name="jurusan_id" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 outline-none">
                     <option value="">-- Pilih Jurusan --</option>
                     <?php foreach ($jurusan as $j): ?>
                         <option value="<?php echo $j['id']; ?>"><?php echo htmlspecialchars($j['nama_jurusan']); ?></option>
@@ -245,20 +253,21 @@ function getRoleClass($role) {
                 </select>
             </div>
 
-            <div class="mb-4 pt-4 border-t border-slate-100">
+            <div class="mb-2 pt-4 border-t border-slate-100">
                 <label for="edit_password" class="block text-sm font-medium text-slate-700 mb-1">Ganti Password (Kosongkan jika tidak diubah)</label>
-                <input type="password" id="edit_password" name="password" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm" placeholder="Password baru (Min 8 karakter)">
+                <input type="password" id="edit_password" name="password" class="w-full px-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 outline-none" placeholder="Password baru (Min 8 karakter)">
             </div>
             
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 text-sm">Batal</button>
-                <button type="submit" class="px-4 py-2 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 text-sm">Update</button>
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeEditModal()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 text-sm transition-colors">Batal</button>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 text-sm shadow-md transition-colors">Simpan Perubahan</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    // JAVASCRIPT BAWAAN ASLI SAMA PERSIS
     let isRelativePathMode = false;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -292,9 +301,8 @@ function getRoleClass($role) {
         document.getElementById('modalAddUser').classList.add('hidden');
     }
 
-    // --- AJAX SUBMIT LOGIC ---
     function submitAddUser(event) {
-        event.preventDefault(); // Mencegah reload halaman
+        event.preventDefault(); 
         
         const form = document.getElementById('formAddUser');
         const formData = new FormData(form);
@@ -302,7 +310,6 @@ function getRoleClass($role) {
         const originalBtnText = btnSubmit.innerHTML;
         const errorMsgEl = document.getElementById('captchaErrorMsg');
 
-        // Disable button loading state
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<span class="material-icons animate-spin text-sm mr-2">sync</span> Menyimpan...';
         errorMsgEl.classList.add('hidden');
@@ -311,7 +318,7 @@ function getRoleClass($role) {
             method: 'POST',
             body: formData,
             headers: {
-                'X-Requested-With': 'XMLHttpRequest' // Header tanda AJAX
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(response => response.json())
@@ -322,7 +329,6 @@ function getRoleClass($role) {
                 refreshCaptcha();
                 document.getElementById('add_captcha').value = '';
                 
-                // Tampilkan pesan error spesifik jika captcha salah
                 if (data.msg.toLowerCase().includes('captcha') || data.msg.toLowerCase().includes('kode keamanan')) {
                     errorMsgEl.innerText = data.msg;
                     errorMsgEl.classList.remove('hidden');
@@ -384,7 +390,7 @@ function getRoleClass($role) {
             return;
         }
         const container = img.parentElement;
-        if (container.classList.contains('w-2/5')) { 
+        if (container.classList.contains('w-full') || container.classList.contains('sm:w-2/5')) { 
             container.innerHTML = 
                 '<div class="flex flex-col items-center justify-center h-10 p-2 text-xs text-rose-600 font-medium">Gagal memuat</div>';
         }

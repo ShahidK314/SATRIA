@@ -3,18 +3,18 @@
 ?>
 <div class="mt-auto"></div> 
     
-    <footer class="bg-white border-t border-slate-200 py-6 px-8 mt-10">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    <footer class="bg-white border-t border-slate-200 py-6 px-4 md:px-8 mt-6 md:mt-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             
-            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8 w-full md:w-auto">
                 <div class="text-center md:text-left">
                     <p class="text-sm font-bold text-slate-700">
                         &copy; 2025 <span class="text-blue-700">SATRIA</span> Politeknik Negeri Jakarta.
                     </p>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5 font-semibold">Enterprise Resource Planning System v1.0</p>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-1 md:mt-0.5 font-semibold">Enterprise Resource Planning System v1.0</p>
                 </div>
                 
-                <div class="hidden md:flex items-center px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+                <div class="flex items-center px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full w-fit mx-auto md:mx-0">
                     <span class="relative flex h-2 w-2 mr-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-6 text-xs font-semibold text-slate-500">
+            <div class="flex flex-wrap justify-center md:justify-end items-center gap-4 md:gap-6 text-[10px] md:text-xs font-semibold text-slate-500 w-full md:w-auto">
                 <a href="/bantuan" class="hover:text-blue-600 transition-colors flex items-center">
                     <span class="material-icons text-[14px] mr-1">help_outline</span> Pusat Bantuan
                 </a>
@@ -42,7 +42,7 @@
         animatedElements.forEach(element => {
             const isInsideModal = element.closest('#modalLogout');
             
-            if (!isInsideModal) {
+            if (!isInsideModal && element.id !== 'toast-notification') {
                 setTimeout(() => {
                     element.style.transition = 'all 0.5s ease-out';
                     element.style.opacity = '0';

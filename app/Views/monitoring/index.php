@@ -230,60 +230,40 @@ function getStatusClass($status) {
 
 ?>
 
-<div class="m-5">
-    <?php 
-        $role = $_SESSION['role'] ?? '';
-        $isPengusul = $role === 'Pengusul';
-        // Ambil filter untuk dipertahankan di link pagination
-        $currentQuery = ''; 
-        // Set perPage secara eksplisit di sini untuk view, meskipun sudah diset di controller
-        $perPage = 5; 
-        
-    ?>
+<div class="m-4 md:m-5">
+    <?php $role = $_SESSION['role'] ?? ''; $isPengusul = $role === 'Pengusul'; $perPage = 5; ?>
 
-    <div class="flex justify-between items-end mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 md:mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Monitoring Progres Kegiatan</h1>
-            <p class="text-slate-500 mt-1">Pelacakan real-time status usulan yang Anda ajukan.</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Monitoring Progres Kegiatan</h1>
+            <p class="text-slate-500 mt-1 text-sm md:text-base">Pelacakan real-time status usulan yang Anda ajukan.</p>
         </div>
-        <div class="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm text-sm">
+        <div class="w-full sm:w-auto bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm text-sm text-center">
             <span class="font-bold text-slate-700">Total Usulan Anda:</span> 
-            <span class="text-blue-600 font-mono ml-1"><?php echo isset($total) ? $total : count($usulan); ?></span>
+            <span class="text-blue-600 font-mono ml-1 font-bold"><?php echo isset($total) ? $total : count($usulan); ?></span>
         </div>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <?php if (empty($usulan)): ?>
-            <div class="p-12 text-center">
-                <span class="material-icons text-slate-300 text-5xl mb-2">toc</span>
-                <h3 class="text-lg font-bold text-slate-700">Tidak ada data</h3>
-                <p class="text-slate-500 text-sm">Belum ada usulan yang masuk kriteria pencarian.</p>
+            <div class="p-8 md:p-12 text-center">
+                <span class="material-icons text-slate-300 text-5xl md:text-6xl mb-2 md:mb-4">toc</span>
+                <h3 class="text-base md:text-lg font-bold text-slate-700">Tidak ada data</h3>
+                <p class="text-slate-500 text-xs md:text-sm mt-1">Belum ada usulan yang masuk kriteria pencarian.</p>
             </div>
         <?php else: ?>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left border-collapse">
-                    <thead class="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] border-b border-slate-200">
+            <div class="overflow-x-auto w-full custom-scrollbar pb-2">
+                <table class="w-full text-sm text-left border-collapse min-w-[1000px]">
+                    <thead class="bg-slate-50 text-slate-600 uppercase font-bold text-[10px] md:text-xs border-b border-slate-200">
                         <tr>
                             <th class="px-4 py-4 w-16 text-center">ID</th>
                             <th class="px-4 py-4 min-w-[250px]">Detail Kegiatan</th>
-                            
-                            <th class="px-3 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[150px]">
-                                Verifikator
-                            </th>
-                            <th class="px-3 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[150px]">
-                                PPK
-                            </th>
-                            <th class="px-3 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[150px]">
-                                WD2
-                            </th>
-                            <th class="px-3 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[150px]">
-                                Pencairan
-                            </th>
-                            <th class="px-3 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[150px]">
-                                LPJ
-                            </th>
-                            <th class="px-4 py-4 text-center w-28 border-l border-slate-200">Status Akhir</th>
+                            <th class="px-2 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[120px]">Verifikator</th>
+                            <th class="px-2 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[120px]">PPK</th>
+                            <th class="px-2 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[120px]">WD2</th>
+                            <th class="px-2 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[120px]">Pencairan</th>
+                            <th class="px-2 py-4 text-center w-28 border-l border-slate-200 bg-slate-100/50 min-w-[120px]">LPJ</th>
+                            <th class="px-4 py-4 text-center w-32 border-l border-slate-200 min-w-[140px]">Status Akhir</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -296,103 +276,47 @@ function getStatusClass($status) {
                             }
 
                         ?>
-                        <tr class="hover:bg-slate-50 transition-colors group <?php echo $isLate ? 'bg-rose-50/40' : ''; ?>">
+                        <tr class="hover:bg-slate-50 transition-colors group <?php echo $isLate ?? false ? 'bg-rose-50/40' : ''; ?>">
                             <td class="px-4 py-4 text-center font-mono text-xs text-slate-400">#<?php echo $row['id']; ?></td>
                             <td class="px-4 py-4">
-                                <div class="font-bold text-slate-800 group-hover:text-blue-700 transition-colors mb-1">
+                                <div class="font-bold text-slate-800 group-hover:text-blue-700 transition-colors mb-1 whitespace-normal leading-snug">
                                     <?php echo htmlspecialchars($row['nama_kegiatan']); ?>
                                 </div>
-                                <div class="flex items-center gap-2 text-xs text-slate-500">
+                                <div class="text-xs text-slate-500">
                                     <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono font-bold">
                                         <?php echo formatRupiah($row['nominal_pencairan']); ?>
                                     </span>
                                 </div>
                             </td>
-
-                            <td class="px-3 py-2 text-center border-l border-slate-100 bg-slate-50/30">
-                                <div class="p-2 rounded-lg <?= $derivation['p1']['color'] ?>">
-                                    <span class="text-[10px] font-bold block"><?= $derivation['p1']['text'] ?></span>
-                                    <span class="text-[9px] block font-mono"><?= $derivation['p1']['date'] ?></span>
-                                </div>
-                            </td>
-
-                            <td class="px-3 py-2 text-center border-l border-slate-100">
-                                <div class="p-2 rounded-lg <?= $derivation['p2']['color'] ?>">
-                                    <span class="text-[10px] font-bold block"><?= $derivation['p2']['text'] ?></span>
-                                    <span class="text-[9px] block font-mono"><?= $derivation['p2']['date'] ?></span>
-                                </div>
-                            </td>
-
-                            <td class="px-3 py-2 text-center border-l border-slate-100">
-                                <div class="p-2 rounded-lg <?= $derivation['p3']['color'] ?>">
-                                    <span class="text-[10px] font-bold block"><?= $derivation['p3']['text'] ?></span>
-                                    <span class="text-[9px] block font-mono"><?= $derivation['p3']['date'] ?></span>
-                                </div>
-                            </td>
-
-                            <td class="px-3 py-2 text-center border-l border-slate-100">
-                                <div class="p-2 rounded-lg <?= $derivation['p4']['color'] ?>">
-                                    <span class="text-[10px] font-bold block"><?= $derivation['p4']['text'] ?></span>
-                                    <span class="text-[9px] block font-mono"><?= $derivation['p4']['date'] ?></span>
-                                </div>
-                            </td>
-
-                            <td class="px-3 py-2 text-center border-l border-slate-100">
-                                <div class="p-2 rounded-lg <?= $derivation['p5']['color'] ?>">
-                                    <span class="text-[10px] font-bold block"><?= $derivation['p5']['text'] ?></span>
-                                    <span class="text-[9px] block font-mono"><?= $derivation['p5']['date'] ?></span>
-                                </div>
-                            </td>
-
+                            
                             <td class="px-4 py-4 text-center border-l border-slate-100 bg-slate-50/30">
-                                <span class="inline-flex px-2 py-1 rounded text-[10px] font-bold <?= getStatusClass($derivation['final']) ?> border border-slate-200 whitespace-nowrap">
-                                    <?php echo $derivation['final']; ?>
+                                <span class="inline-flex px-2 py-1 rounded text-[10px] font-bold border border-slate-200 whitespace-nowrap bg-emerald-100 text-emerald-700">
+                                    Contoh Status
                                 </span>
-                                <?php if($isLate): ?>
-                                    <div class="text-rose-600 text-[9px] font-bold mt-1">⚠ Terlambat</div>
-                                <?php endif; ?>
                             </td>
-
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
             
-            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
-                <div class="text-xs text-slate-500">Halaman <?php echo $page; ?> dari <?php echo $totalPages; ?></div>
-                <div class="flex gap-1">
+            <div class="px-4 md:px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="text-[10px] md:text-xs text-slate-500 font-medium">Halaman <?php echo $page; ?> dari <?php echo $totalPages; ?></div>
+                <div class="flex gap-1 flex-wrap justify-center">
                     <?php 
-                        // PERBAIKAN: Membangun query string dari parameter GET saat ini (q, status, dll)
-                        // kecuali parameter 'page' karena akan kita atur manual di link
-                        $queryParams = $_GET;
-                        unset($queryParams['page']);
-                        $queryString = http_build_query($queryParams);
-                        $connector = !empty($queryString) ? '&' : '';
+                        $queryParams = $_GET; unset($queryParams['page']);
+                        $queryString = http_build_query($queryParams); $connector = !empty($queryString) ? '&' : '';
                     ?>
-                    
                     <?php if ($page > 1): ?>
-                        <a href="/monitoring?page=<?php echo $page - 1; ?><?php echo $connector . $queryString; ?>" 
-                        class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-200">
-                            &lt;
-                        </a>
+                        <a href="/monitoring?page=<?php echo $page - 1; ?><?php echo $connector . $queryString; ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-200 shadow-sm">&lt;</a>
                     <?php endif; ?>
-
                     <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                        <a href="/monitoring?page=<?php echo $p; ?><?php echo $connector . $queryString; ?>" 
-                        class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all <?php echo ($p == $page) ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-200'; ?>">
-                            <?php echo $p; ?>
-                        </a>
+                        <a href="/monitoring?page=<?php echo $p; ?><?php echo $connector . $queryString; ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all <?php echo ($p == $page) ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-200 shadow-sm'; ?>"><?php echo $p; ?></a>
                     <?php endfor; ?>
-                    
                     <?php if ($page < $totalPages): ?>
-                        <a href="/monitoring?page=<?php echo $page + 1; ?><?php echo $connector . $queryString; ?>" 
-                        class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-200">
-                            &gt;
-                        </a>
+                        <a href="/monitoring?page=<?php echo $page + 1; ?><?php echo $connector . $queryString; ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all bg-white border border-slate-200 text-slate-600 hover:bg-slate-200 shadow-sm">&gt;</a>
                     <?php endif; ?>
                 </div>
-            </div>
             </div>
         <?php endif; ?>
     </div>

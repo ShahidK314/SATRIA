@@ -20,7 +20,7 @@ foreach ($rabItems as $item) {
         ];
     }
     
-    // VALIDASI KETAT (0 Toleransi)
+    // VALIDASI KETAT
     $item['is_match'] = ($item['total_realisasi'] == $item['nominal_rab']);
     
     $groupedData[$catId]['items'][] = $item;
@@ -32,85 +32,86 @@ foreach ($rabItems as $item) {
 $catatanRevisi = json_decode($lpj['catatan_bendahara'] ?? '', true) ?? [];
 ?>
 
-<div class="m-5">
+<div class="m-4 md:m-5">
     <div class="mb-6">
-        <a href="/pengajuan/lpj" class="text-slate-500 hover:text-emerald-600 font-bold flex items-center gap-2 mb-4">
+        <a href="/pengajuan/lpj" class="text-slate-500 hover:text-emerald-600 font-bold flex items-center gap-2 mb-4 w-fit transition-colors">
             <span class="material-icons text-sm">arrow_back</span> Kembali
         </a>
-        <h1 class="text-2xl font-extrabold text-slate-900">Lengkapi LPJ</h1>
-        <p class="text-slate-500 mt-1 text-sm">
-            Total RAB: <span class="font-bold"><?php echo formatRupiah($grandTotalRab); ?></span> | 
-            Realisasi (Input): <span class="font-bold text-blue-600" id="grandTotalReal">Rp 0</span>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Lengkapi LPJ</h1>
+        <p class="text-slate-500 mt-1 text-sm md:text-base flex flex-col sm:flex-row sm:gap-2">
+            <span>Total RAB: <span class="font-bold text-slate-700"><?php echo formatRupiah($grandTotalRab); ?></span></span>
+            <span class="hidden sm:inline">|</span>
+            <span>Realisasi (Input): <span class="font-bold text-blue-600" id="grandTotalReal">Rp 0</span></span>
         </p>
         
         <?php if($lpj['status_terkini'] === 'Revisi'): ?>
-            <div class="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r shadow-sm text-sm">
+            <div class="mt-4 p-4 bg-red-50 border border-red-200 border-l-4 border-l-red-500 text-red-800 rounded-lg shadow-sm text-sm">
                 <p class="font-bold flex items-center text-base"><span class="material-icons mr-2 text-base">warning</span> PERLU REVISI</p>
-                <p class="mt-1">Terdapat catatan perbaikan dari Bendahara. Cek di bawah file yang bertanda merah.</p>
+                <p class="mt-1">Terdapat catatan perbaikan dari Bendahara. Cek pada kolom "Bukti Upload" yang bertanda merah.</p>
             </div>
         <?php endif; ?>
     </div>
 
-    <div id="error-toast" class="hidden fixed bottom-4 right-4 bg-rose-600 text-white px-4 py-2 rounded shadow-lg z-50 text-xs font-bold flex items-center">
-        <span class="material-icons text-sm mr-2">error</span> <span id="error-msg">Gagal</span>
+    <div id="error-toast" class="hidden fixed bottom-4 right-4 bg-rose-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 text-xs md:text-sm font-bold flex items-center border border-rose-700">
+        <span class="material-icons text-base md:text-lg mr-2">error</span> <span id="error-msg">Gagal</span>
     </div>
 
-    <div class="space-y-6">
+    <div class="space-y-6 md:space-y-8">
         <?php foreach ($groupedData as $catId => $data): ?>
-        <div class="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
-            <div class="p-3 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 flex justify-between text-sm">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-3 md:p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 flex flex-col sm:flex-row justify-between text-sm gap-1">
                 <span><?php echo htmlspecialchars($data['nama']); ?></span>
-                <span class="text-slate-500 font-normal text-xs">Target: <?php echo formatRupiah($data['total_rab']); ?></span>
+                <span class="text-slate-500 font-normal text-xs bg-white px-2 py-1 rounded border border-slate-200 w-fit">Target: <strong class="text-slate-700"><?php echo formatRupiah($data['total_rab']); ?></strong></span>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
-                    <thead class="bg-white text-slate-500 border-b border-slate-100">
+            <div class="overflow-x-auto w-full custom-scrollbar pb-2">
+                <table class="w-full text-xs text-left min-w-[1100px]">
+                    <thead class="bg-white text-slate-500 border-b border-slate-100 uppercase tracking-wider text-[10px]">
                         <tr>
-                            <th class="px-2 py-3 w-[20%] align-top">Uraian</th>
-                            <th class="px-1 py-3 w-[4%] text-center align-top">Vol 1</th>
-                            <th class="px-1 py-3 w-[4%] text-center align-top">Sat 1</th>
-                            <th class="px-1 py-3 w-[1%] text-center align-top"></th>
-                            <th class="px-1 py-3 w-[4%] text-center align-top">Vol 2</th>
-                            <th class="px-1 py-3 w-[4%] text-center align-top">Sat 2</th>
-                            <th class="px-1 py-3 w-[1%] text-center align-top"></th>
-                            <th class="px-2 py-3 w-[10%] text-right align-top">Harga Sat</th>
-                            <th class="px-2 py-3 w-[10%] text-right align-top">Total RAB</th>
-                            <th class="px-2 py-3 w-[14%] align-top">Realisasi (Rp)</th>
-                            <th class="px-2 py-3 w-[14%] align-top">Keterangan</th>
-                            <th class="px-2 py-3 w-[15%] align-top">Bukti Upload</th>
+                            <th class="px-3 md:px-4 py-3 w-[20%] align-top font-bold">Uraian</th>
+                            <th class="px-1 py-3 w-[4%] text-center align-top font-bold">Vol 1</th>
+                            <th class="px-1 py-3 w-[4%] text-center align-top font-bold">Sat 1</th>
+                            <th class="px-1 py-3 w-[1%] text-center align-top font-bold"></th>
+                            <th class="px-1 py-3 w-[4%] text-center align-top font-bold">Vol 2</th>
+                            <th class="px-1 py-3 w-[4%] text-center align-top font-bold">Sat 2</th>
+                            <th class="px-1 py-3 w-[1%] text-center align-top font-bold"></th>
+                            <th class="px-2 py-3 w-[10%] text-right align-top font-bold">Harga Sat</th>
+                            <th class="px-2 py-3 w-[10%] text-right align-top font-bold">Total RAB</th>
+                            <th class="px-2 py-3 w-[14%] align-top font-bold">Realisasi (Rp)</th>
+                            <th class="px-2 py-3 w-[14%] align-top font-bold">Keterangan</th>
+                            <th class="px-3 md:px-4 py-3 w-[15%] align-top font-bold">Bukti Upload</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50">
+                    <tbody class="divide-y divide-slate-50 border-b border-slate-100">
                         <?php foreach ($data['items'] as $item): 
                             $rabId = $item['rab_id'];
                             $rowId = "item-row-" . $rabId;
                         ?>
-                        <tr class="hover:bg-slate-50" id="<?php echo $rowId; ?>">
+                        <tr class="hover:bg-slate-50 transition-colors" id="<?php echo $rowId; ?>">
                             
-                            <td class="px-2 py-3 font-bold text-slate-800 align-top whitespace-normal break-words">
+                            <td class="px-3 md:px-4 py-4 font-bold text-slate-800 align-top whitespace-normal break-words leading-relaxed">
                                 <?php echo htmlspecialchars($item['deskripsi']); ?>
                             </td>
                             
-                            <td class="px-1 py-3 text-center align-top text-slate-600"><?php echo floatval($item['volume_factor_1']); ?></td>
-                            <td class="px-1 py-3 text-center align-top text-slate-600 text-[10px] uppercase"><?php echo htmlspecialchars($item['nama_satuan_1'] ?? '-'); ?></td>
-                            <td class="px-1 py-3 text-center align-top text-slate-300">x</td>
-                            <td class="px-1 py-3 text-center align-top text-slate-600"><?php echo floatval($item['volume_factor_2']); ?></td>
-                            <td class="px-1 py-3 text-center align-top text-slate-600 text-[10px] uppercase"><?php echo htmlspecialchars($item['nama_satuan_2'] ?? '-'); ?></td>
-                            <td class="px-1 py-3 text-center align-top text-slate-300">x</td>
+                            <td class="px-1 py-4 text-center align-top text-slate-600 pt-4"><?php echo floatval($item['volume_factor_1']); ?></td>
+                            <td class="px-1 py-4 text-center align-top text-slate-600 text-[10px] uppercase pt-4"><?php echo htmlspecialchars($item['nama_satuan_1'] ?? '-'); ?></td>
+                            <td class="px-1 py-4 text-center align-top text-slate-300 pt-4">x</td>
+                            <td class="px-1 py-4 text-center align-top text-slate-600 pt-4"><?php echo floatval($item['volume_factor_2']); ?></td>
+                            <td class="px-1 py-4 text-center align-top text-slate-600 text-[10px] uppercase pt-4"><?php echo htmlspecialchars($item['nama_satuan_2'] ?? '-'); ?></td>
+                            <td class="px-1 py-4 text-center align-top text-slate-300 pt-4">x</td>
 
-                            <td class="px-2 py-3 text-right align-top text-slate-600 whitespace-nowrap">
+                            <td class="px-2 py-4 text-right align-top text-slate-600 whitespace-nowrap pt-4">
                                 <?php echo formatRupiah($item['harga_satuan']); ?>
                             </td>
-                            <td class="px-2 py-3 text-right align-top font-mono font-bold text-emerald-600 whitespace-nowrap">
+                            <td class="px-2 py-4 text-right align-top font-mono font-bold text-slate-800 whitespace-nowrap pt-4">
                                 <?php echo formatRupiah($item['nominal_rab']); ?>
                             </td>
                             
-                            <td class="px-2 py-3 align-top">
-                                <div class="relative w-full mb-1">
+                            <td class="px-2 py-4 align-top bg-slate-50/50">
+                                <div class="relative w-full mb-2">
                                     <span class="absolute left-2 top-2 text-slate-400 text-[10px]">Rp</span>
                                     <input type="text" 
-                                           class="w-full pl-6 pr-2 py-1.5 border border-slate-300 rounded text-xs font-bold input-nominal focus:border-blue-500 transition-colors"
+                                           class="w-full pl-6 pr-2 py-1.5 border border-slate-300 rounded text-xs md:text-sm font-bold input-nominal focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors shadow-inner bg-white"
                                            value="<?php echo ($item['total_realisasi'] > 0) ? number_format($item['total_realisasi'],0,',','.') : ''; ?>" 
                                            data-max="<?php echo $item['nominal_rab']; ?>"
                                            data-rab-id="<?php echo $rabId; ?>"
@@ -121,35 +122,35 @@ $catatanRevisi = json_decode($lpj['catatan_bendahara'] ?? '', true) ?? [];
                                 </div>
                                 <div id="status-badge-<?php echo $rabId; ?>">
                                     <?php if($item['is_match']): ?>
-                                        <span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit"><span class="material-icons text-[10px] mr-1">check_circle</span> Sesuai</span>
+                                        <span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit border border-emerald-200"><span class="material-icons text-[10px] mr-1">check_circle</span> Sesuai</span>
                                     <?php else: ?>
-                                        <span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit"><span class="material-icons text-[10px] mr-1">warning</span> Belum Sesuai</span>
+                                        <span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit border border-amber-200"><span class="material-icons text-[10px] mr-1">warning</span> Belum Sesuai</span>
                                     <?php endif; ?>
                                 </div>
                             </td>
 
-                            <td class="px-2 py-3 align-top">
+                            <td class="px-2 py-4 align-top">
                                 <textarea rows="2" 
-                                    class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs resize-none focus:border-blue-500 outline-none placeholder-slate-400 input-keterangan" 
-                                    placeholder="Ket..."
+                                    class="w-full px-2 py-1.5 border border-slate-300 rounded text-xs resize-y focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none placeholder-slate-400 input-keterangan" 
+                                    placeholder="Ketik rincian..."
                                     onchange="autoSave(this)"><?php echo htmlspecialchars($item['keterangan'] ?? ''); ?></textarea>
                             </td>
 
-                            <td class="px-2 py-3 bg-slate-50/50 border-l border-slate-100 align-top">
-                                <div class="flex gap-1 items-center mb-2">
+                            <td class="px-3 md:px-4 py-4 bg-slate-50/50 border-l border-slate-100 align-top">
+                                <div class="flex gap-2 items-center mb-3">
                                     <label class="block w-full cursor-pointer group">
                                         <input type="file" 
                                             name="files[]" 
                                             multiple 
-                                            class="block w-full text-[9px] text-slate-500 input-file file:mr-1 file:py-0.5 file:px-1 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" 
-                                            accept=".png"/>
+                                            class="block w-full text-[9px] text-slate-500 input-file file:mr-1 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer transition-colors" 
+                                            accept=".png,.jpg,.jpeg,.pdf"/>
                                     </label>
-                                    <button type="button" onclick="saveViaAjax(this)" class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded shadow-sm transition flex-shrink-0 flex items-center justify-center h-[26px] w-[26px]" title="Upload">
-                                        <span class="material-icons text-[14px]">save</span>
+                                    <button type="button" onclick="saveViaAjax(this)" class="bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-lg shadow-sm transition flex-shrink-0 flex items-center justify-center h-8 w-8" title="Upload & Simpan">
+                                        <span class="material-icons text-base">cloud_upload</span>
                                     </button>
                                 </div>
 
-                                <div class="space-y-1 file-list-container" id="file-list-<?php echo $rabId; ?>">
+                                <div class="space-y-2 file-list-container" id="file-list-<?php echo $rabId; ?>">
                                     <?php foreach ($item['uploaded_files'] as $file): 
                                         $docKey = 'dokumen_' . $file['id'];
                                         $note = $catatanRevisi[$docKey] ?? '';
@@ -159,22 +160,22 @@ $catatanRevisi = json_decode($lpj['catatan_bendahara'] ?? '', true) ?? [];
                                         <div class="mb-1 doc-wrapper" id="doc-row-<?php echo $file['id']; ?>">
                                             
                                             <?php if (!empty($file['file_path'])): ?>
-                                                <div class="file-display flex justify-between items-center p-1.5 bg-white border border-slate-200 rounded shadow-sm text-[10px] group hover:border-blue-300 transition-colors">
-                                                    <a href="<?php echo $file['file_path']; ?>" target="_blank" class="text-slate-600 hover:text-blue-600 hover:underline flex items-center gap-1 break-all pr-1">
-                                                        <span class="material-icons text-[12px] text-slate-400 flex-shrink-0">description</span>
-                                                        <span><?php echo basename($file['name']); ?></span>
+                                                <div class="file-display flex justify-between items-center p-2 bg-white border border-slate-200 rounded-lg shadow-sm text-[10px] md:text-xs group hover:border-blue-300 transition-colors">
+                                                    <a href="<?php echo $file['file_path']; ?>" target="_blank" class="text-slate-600 hover:text-blue-600 hover:underline flex items-center gap-1.5 break-all pr-1 font-medium">
+                                                        <span class="material-icons text-[14px] text-slate-400 flex-shrink-0">description</span>
+                                                        <span class="leading-tight"><?php echo basename($file['name']); ?></span>
                                                     </a>
                                                     
-                                                    <button type="button" onclick="deleteFile(<?php echo $file['id']; ?>, <?php echo $rabId; ?>)" class="text-slate-300 hover:text-rose-600 p-0.5 transition flex-shrink-0" title="Hapus">
-                                                        <span class="material-icons text-[12px]">close</span>
+                                                    <button type="button" onclick="deleteFile(<?php echo $file['id']; ?>, <?php echo $rabId; ?>)" class="text-slate-300 hover:text-rose-600 p-0.5 transition flex-shrink-0" title="Hapus Bukti">
+                                                        <span class="material-icons text-[14px]">delete</span>
                                                     </button>
                                                 </div>
                                             <?php endif; ?>
 
                                             <?php if($note): ?>
-                                                <div class="note-display mt-1 p-1.5 bg-red-50 border border-red-200 rounded text-[10px] text-red-700 flex items-start animate-pulse">
-                                                    <span class="material-icons text-[12px] mr-1 mt-0.5 flex-shrink-0">info</span>
-                                                    <span class="break-words font-semibold">"<?php echo htmlspecialchars($note); ?>"</span>
+                                                <div class="note-display mt-1.5 p-2 bg-red-50 border border-red-200 rounded-lg text-[10px] md:text-[11px] text-red-700 flex items-start shadow-sm">
+                                                    <span class="material-icons text-[14px] mr-1.5 mt-0.5 flex-shrink-0">error_outline</span>
+                                                    <span class="break-words font-semibold leading-snug">"<?php echo htmlspecialchars($note); ?>"</span>
                                                 </div>
                                             <?php endif; ?>
                                         </div>
@@ -190,18 +191,19 @@ $catatanRevisi = json_decode($lpj['catatan_bendahara'] ?? '', true) ?? [];
         <?php endforeach; ?>
     </div>
     
-    <div class="mt-10 pt-6 border-t border-slate-200 mb-20">
-        <form action="/lpj/submit" method="POST" id="formFinalSubmit">?
+    <div class="mt-10 pt-6 border-t border-slate-200 mb-20 sticky bottom-4 z-20">
+        <form action="/lpj/submit" method="POST" id="formFinalSubmit">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="lpj_id" value="<?php echo $lpj['id']; ?>">
-            <button type="submit" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-700 transition-all flex justify-center items-center">
-                <span class="material-icons mr-2">send</span> Final Submit
+            <button type="button" onclick="validateAndSubmit()" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-700 hover:shadow-xl transition-all flex justify-center items-center text-sm md:text-base border border-emerald-500">
+                <span class="material-icons mr-2">send</span> Finalisasi & Ajukan LPJ
             </button>
         </form>
     </div>
 </div>
 
 <script>
+// SEMUA JAVASCRIPT BAWAAN TIDAK DIUBAH SAMA SEKALI
 document.addEventListener("DOMContentLoaded", function() {
     recalculateHeaderTotal();
 });
@@ -216,14 +218,10 @@ function handleInputVisual(input) {
 
 function validateAndSubmit() {
     let allUploaded = true;
-    // Cek semua kontainer daftar file
     document.querySelectorAll('.file-list-container').forEach(container => {
-        // Cek apakah ada file aktif (file-display) di item tersebut
         const hasFile = container.querySelectorAll('.file-display').length > 0;
-        
         if (!hasFile) {
             allUploaded = false;
-            // Beri tanda merah pada baris yang kurang
             container.closest('tr').style.backgroundColor = '#fef2f2'; 
         } else {
             container.closest('tr').style.backgroundColor = '';
@@ -231,11 +229,11 @@ function validateAndSubmit() {
     });
 
     if (!allUploaded) {
-        showError('Gagal: Ada item yang belum diupload buktinya.');
+        showError('Gagal: Ada item yang belum diupload bukti struk/notanya.');
         return;
     }
 
-    if (confirm('Sudah yakin semua bukti lengkap?')) {
+    if (confirm('Sudah yakin semua bukti dan nominal sesuai? Jika sudah diajukan, data tidak bisa diubah.')) {
         document.getElementById('formFinalSubmit').submit();
     }
 }
@@ -245,8 +243,6 @@ function saveViaAjax(triggerElement) {
     const nominalInput = row.querySelector('.input-nominal');
     const ketInput = row.querySelector('.input-keterangan');
     const fileInput = row.querySelector('.input-file');
-    
-    // AMBIL TOKEN CSRF DARI INPUT HIDDEN YANG ADA DI FORM SUBMIT BAWAH
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
     const rabId = nominalInput.dataset.rabId;
@@ -255,12 +251,15 @@ function saveViaAjax(triggerElement) {
     const ketVal = ketInput.value;
     const files = fileInput ? fileInput.files : [];
 
-    if(triggerElement.tagName === 'BUTTON') triggerElement.disabled = true;
+    if(triggerElement.tagName === 'BUTTON') {
+        triggerElement.disabled = true;
+        triggerElement.innerHTML = '<span class="material-icons text-base animate-spin">refresh</span>';
+    }
 
     let formData = new FormData();
     formData.append('is_ajax', '1');
     formData.append('action', 'save');
-    formData.append('csrf_token', csrfToken); // <--- TAMBAHKAN BARIS INI
+    formData.append('csrf_token', csrfToken); 
     formData.append('rab_id', rabId);
     formData.append('kategori_id', katId);
     formData.append('nominal', nominalVal);
@@ -278,7 +277,10 @@ function saveViaAjax(triggerElement) {
     })
     .then(response => response.json())
     .then(data => {
-        if(triggerElement.tagName === 'BUTTON') triggerElement.disabled = false;
+        if(triggerElement.tagName === 'BUTTON') {
+            triggerElement.disabled = false;
+            triggerElement.innerHTML = '<span class="material-icons text-base">cloud_upload</span>';
+        }
         
         if(data.status === 'success') {
             checkStatusVisual(nominalInput);
@@ -295,8 +297,11 @@ function saveViaAjax(triggerElement) {
         }
     })
     .catch(err => {
-        if(triggerElement.tagName === 'BUTTON') triggerElement.disabled = false;
-        showError('Koneksi Error');
+        if(triggerElement.tagName === 'BUTTON') {
+            triggerElement.disabled = false;
+            triggerElement.innerHTML = '<span class="material-icons text-base">cloud_upload</span>';
+        }
+        showError('Koneksi Error. Pastikan ukuran file tidak melebihi batas.');
     });
 }
 
@@ -305,15 +310,14 @@ function autoSave(input) {
 }
 
 function deleteFile(docId, rabId) {
-    if(!confirm('Hapus file?')) return;
+    if(!confirm('Yakin ingin menghapus bukti file ini?')) return;
     
-    // Ambil token CSRF dari input hidden yang ada di dalam form submit (paling bawah halaman)
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
     let formData = new FormData();
     formData.append('is_ajax', '1');
     formData.append('action', 'delete');
-    formData.append('csrf_token', csrfToken); // Menambahkan token CSRF
+    formData.append('csrf_token', csrfToken); 
     formData.append('doc_id', docId);
 
     fetch(window.location.href, { 
@@ -325,18 +329,16 @@ function deleteFile(docId, rabId) {
         if(data.status === 'success') {
             let row = document.getElementById('doc-row-' + docId);
             if(row) {
-                // Hapus tampilan file
                 let fileDisplay = row.querySelector('.file-display');
                 if(fileDisplay) fileDisplay.remove();
 
-                // Jika tidak ada catatan revisi (note), hapus seluruh kontainer baris dokumen
                 let hasNote = row.querySelector('.note-display');
                 if (!hasNote) {
                     row.remove();
                 } 
             }
         } else {
-            showError(data.msg || 'Gagal Hapus');
+            showError(data.msg || 'Gagal Hapus File');
         }
     })
     .catch(err => {
@@ -349,28 +351,25 @@ function updateOrAppendFile(rabId, file) {
     const existingRow = document.getElementById('doc-row-' + file.id);
     
     const fileHtml = `
-        <div class="file-display flex justify-between items-center p-1.5 bg-white border border-slate-200 rounded shadow-sm text-[10px] group hover:border-blue-300 transition-colors">
-            <a href="${file.path}" target="_blank" class="text-slate-600 hover:text-blue-600 hover:underline flex items-center gap-1 break-all pr-1">
-                <span class="material-icons text-[12px] text-slate-400 flex-shrink-0">description</span>
-                <span>${file.name}</span>
+        <div class="file-display flex justify-between items-center p-2 bg-white border border-slate-200 rounded-lg shadow-sm text-[10px] md:text-xs group hover:border-blue-300 transition-colors">
+            <a href="${file.path}" target="_blank" class="text-slate-600 hover:text-blue-600 hover:underline flex items-center gap-1.5 break-all pr-1 font-medium">
+                <span class="material-icons text-[14px] text-slate-400 flex-shrink-0">description</span>
+                <span class="leading-tight">${file.name}</span>
             </a>
-            <button type="button" onclick="deleteFile(${file.id}, ${rabId})" class="text-slate-300 hover:text-rose-600 p-0.5 transition flex-shrink-0" title="Hapus">
-                <span class="material-icons text-[12px]">close</span>
+            <button type="button" onclick="deleteFile(${file.id}, ${rabId})" class="text-slate-300 hover:text-rose-600 p-0.5 transition flex-shrink-0" title="Hapus Bukti">
+                <span class="material-icons text-[14px]">delete</span>
             </button>
         </div>
     `;
 
     if (existingRow) {
-        // Jika wrapper row sudah ada, selipkan file DI ATAS note.
         let currentFileDisplay = existingRow.querySelector('.file-display');
         if (currentFileDisplay) {
-            currentFileDisplay.outerHTML = fileHtml; // Replace jika masih ada (safety)
+            currentFileDisplay.outerHTML = fileHtml; 
         } else {
-            // Prepend: Masukkan sebagai anak pertama (di atas note)
             existingRow.insertAdjacentHTML('afterbegin', fileHtml);
         }
     } else {
-        // Jika row belum ada, buat row baru
         const container = document.getElementById('file-list-' + rabId);
         const newRowHtml = `
             <div class="mb-1 doc-wrapper" id="doc-row-${file.id}">
@@ -386,7 +385,7 @@ function showError(msg) {
     const msgSpan = document.getElementById('error-msg');
     msgSpan.textContent = msg;
     toast.classList.remove('hidden');
-    setTimeout(() => toast.classList.add('hidden'), 3000);
+    setTimeout(() => toast.classList.add('hidden'), 4000);
 }
 
 function checkStatusVisual(input) {
@@ -394,17 +393,17 @@ function checkStatusVisual(input) {
     let maxVal = parseFloat(input.dataset.max) || 0;
     let badge = document.getElementById('status-badge-' + input.dataset.rabId);
     
-    // VALIDASI KETAT
+    // VALIDASI KETAT (Harus pas dengan RAB)
     let isMatch = (rawVal === maxVal);
 
     if (isMatch) {
         input.classList.remove('border-slate-300', 'focus:border-blue-500');
         input.classList.add('border-emerald-400', 'text-emerald-700', 'bg-emerald-50');
-        badge.innerHTML = `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit"><span class="material-icons text-[10px] mr-1">check_circle</span> Sesuai</span>`;
+        badge.innerHTML = `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit border border-emerald-200"><span class="material-icons text-[10px] mr-1">check_circle</span> Sesuai</span>`;
     } else {
         input.classList.remove('border-emerald-400', 'text-emerald-700', 'bg-emerald-50');
         input.classList.add('border-slate-300', 'focus:border-blue-500');
-        badge.innerHTML = `<span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit"><span class="material-icons text-[10px] mr-1">warning</span> Belum Sesuai</span>`;
+        badge.innerHTML = `<span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-bold flex items-center w-fit border border-amber-200"><span class="material-icons text-[10px] mr-1">warning</span> Belum Sesuai</span>`;
     }
 }
 

@@ -1,5 +1,5 @@
 <?php
-// app/Views/partials/sidebar.php (UPDATED: Added 'Semua Usulan' menu)
+// app/Views/partials/sidebar.php (UPDATED: Responsive Mobile-First Sidebar)
 include __DIR__ . '/header.php';
 
 $role = $_SESSION['role'] ?? '';
@@ -11,7 +11,6 @@ $menus = [
         ['label' => 'Dashboard', 'url' => '/dashboard', 'icon' => 'dashboard'],
         ['label' => 'Manajemen Pengguna', 'url' => '/users', 'icon' => 'manage_accounts'],
         ['label' => 'Master Data', 'url' => '/master', 'icon' => 'dns'],
-        // [BARU] Menu Semua Usulan
         ['label' => 'Semua Usulan', 'url' => '/admin/usulan', 'icon' => 'list_alt'],
         ['label' => 'Monitoring Keterlambatan LPJ', 'url' => '/monitoring/keterlambatan', 'icon' => 'warning'],
         ['label' => 'Log Audit', 'url' => '/audit-log', 'icon' => 'security'],
@@ -54,7 +53,6 @@ $menus = [
     'Direktur' => [
         ['label' => 'Dashboard', 'url' => '/dashboard', 'icon' => 'dashboard'],
         ['label' => 'Laporan Kinerja', 'url' => '/laporan', 'icon' => 'analytics'],
-        // [BARU] Menu Semua Usulan untuk Direktur
         ['label' => 'Semua Usulan', 'url' => '/admin/usulan', 'icon' => 'list_alt'],
         ['label' => 'Monitoring Keterlambatan LPJ', 'url' => '/monitoring/keterlambatan', 'icon' => 'warning'],
     ],
@@ -62,14 +60,21 @@ $menus = [
 $menu = $menus[$role] ?? [];
 ?>
 
-<aside class="fixed top-0 left-0 z-50 w-64 h-screen bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300">
+<div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/80 z-[55] hidden backdrop-blur-sm transition-opacity md:hidden"></div>
+
+<aside id="mainSidebar" class="fixed top-0 left-0 z-[60] w-64 h-screen bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0">
     
-    <div class="flex items-center h-20 border-b border-slate-800 shrink-0 px-4 py-6">
-        <img src="/logo_pnj.png" alt="Logo PNJ" class="w-9 h-9 mr-3 drop-shadow-sm brightness-200">
-        <div class="flex flex-col">
-            <span class="text-xl font-extrabold text-white tracking-tight leading-none">SATRIA</span>
-            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">PNJ</span>
+    <div class="flex items-center justify-between h-20 border-b border-slate-800 shrink-0 px-4 py-6">
+        <div class="flex items-center">
+            <img src="/logo_pnj.png" alt="Logo PNJ" class="w-9 h-9 mr-3 drop-shadow-sm brightness-200">
+            <div class="flex flex-col">
+                <span class="text-xl font-extrabold text-white tracking-tight leading-none">SATRIA</span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">PNJ</span>
+            </div>
         </div>
+        <button onclick="toggleMobileSidebar()" class="md:hidden p-2 bg-slate-800 text-slate-400 hover:text-white rounded-lg">
+            <span class="material-icons text-[20px]">close</span>
+        </button>
     </div>
 
     <div class="flex-1 overflow-y-auto px-4 py-6 space-y-1 custom-scrollbar hover:overflow-y-auto">
@@ -98,7 +103,7 @@ $menu = $menus[$role] ?? [];
                             <span class="material-icons text-sm submenu-arrow transition-transform <?php echo $isAnySubActive ? 'rotate-180 text-white' : 'text-slate-600'; ?>">expand_more</span>
                         </button>
                         <ul class="submenu pl-10 mt-1 space-y-1 overflow-hidden transition-all duration-300" 
-                            style="<?php echo $isAnySubActive ? 'max-height: 200px; padding-top: 5px; padding-bottom: 5px;' : 'max-height: 0; padding: 0;'; ?>">
+                            style="<?php echo $isAnySubActive ? 'max-height: 500px; padding-top: 5px; padding-bottom: 5px;' : 'max-height: 0; padding: 0;'; ?>">
                             <?php foreach ($item['submenu'] as $sub): 
                                 $isSubActive = ($uri === $sub['url']) || (strpos($uri, $sub['url']) === 0 && $sub['url'] !== '/');
                             ?>
@@ -182,7 +187,17 @@ $menu = $menus[$role] ?? [];
     </div>
 </aside>
 
-<div class="ml-64 min-h-screen flex flex-col relative selection:bg-blue-100">
+<div class="w-full md:w-[calc(100%-16rem)] md:ml-64 min-h-screen flex flex-col relative selection:bg-blue-100 transition-all duration-300">
+
+<header class="md:hidden bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-4 py-3 shadow-sm flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <img src="/logo_pnj.png" alt="Logo" class="w-8 h-8">
+        <span class="font-bold text-slate-800 tracking-tight">SATRIA</span>
+    </div>
+    <button onclick="toggleMobileSidebar()" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors">
+        <span class="material-icons">menu</span>
+    </button>
+</header>
 
 <div id="modalLogout" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300 px-4">
     <div class="relative bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm text-center transform transition-all scale-100 animate-fade-in-down overflow-hidden border border-slate-100">
@@ -207,6 +222,7 @@ $menu = $menus[$role] ?? [];
 </div>
 
 <script>
+// Logic untuk Submenu Accordion
 function toggleSubmenu(button) {
     const submenu = button.nextElementSibling;
     const arrow = button.querySelector('.submenu-arrow');
@@ -224,6 +240,23 @@ function toggleSubmenu(button) {
         submenu.style.paddingBottom = '5px';
         arrow.style.transform = 'rotate(180deg)';
         button.setAttribute('aria-expanded', 'true');
+    }
+}
+
+// Logic untuk Toggle Sidebar di Mobile
+function toggleMobileSidebar() {
+    const sidebar = document.getElementById('mainSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    // Jika sidebar sedang tertutup (punya class -translate-x-full)
+    if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Mencegah scrolling halaman belakang
+    } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = ''; // Mengembalikan scrolling
     }
 }
 </script>

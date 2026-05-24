@@ -8,27 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center text-center px-6">
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center text-center px-4 md:px-6">
     
-    <div class="relative mb-8">
-        <div class="text-[10rem] font-black text-slate-200 leading-none select-none">404</div>
+    <div class="relative mb-6 sm:mb-8">
+        <div class="text-[7rem] sm:text-[10rem] font-black text-slate-200 leading-none select-none">404</div>
         <div class="absolute inset-0 flex items-center justify-center">
-            <div class="bg-white p-4 rounded-2xl shadow-xl border border-slate-100 transform rotate-12">
-                 <img src="/logo_pnj.png" alt="Logo" class="w-16 opacity-50 grayscale">
+            <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl border border-slate-100 transform rotate-12">
+                 <img src="/logo_pnj.png" alt="Logo" class="w-12 sm:w-16 opacity-50 grayscale">
             </div>
         </div>
     </div>
 
-    <h1 class="text-3xl font-extrabold text-slate-900 mb-3">Halaman Tidak Ditemukan</h1>
-    <p class="text-slate-500 text-lg max-w-md mx-auto mb-8 leading-relaxed">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2 sm:mb-3">Halaman Tidak Ditemukan</h1>
+    <p class="text-slate-500 text-sm sm:text-lg max-w-xs sm:max-w-md mx-auto mb-8 leading-relaxed">
         Kami telah mencari ke seluruh sistem, tetapi dokumen atau halaman yang Anda tuju sepertinya telah dipindahkan atau dihapus.
     </p>
 
-    <a href="/dashboard" class="inline-flex items-center px-8 py-3.5 bg-blue-700 text-white font-bold rounded-full shadow-lg hover:bg-blue-800 hover:shadow-blue-700/30 hover:-translate-y-1 transition-all">
+    <a href="/dashboard" class="w-full sm:w-auto max-w-xs mx-auto inline-flex items-center justify-center px-8 py-3.5 bg-blue-700 text-white text-sm sm:text-base font-bold rounded-full shadow-lg hover:bg-blue-800 hover:shadow-blue-700/30 hover:-translate-y-1 transition-all">
         Kembali ke Dashboard
     </a>
 
-    <div class="mt-12 text-xs text-slate-400 font-medium">
+    <div class="mt-12 text-[10px] sm:text-xs text-slate-400 font-medium">
         SATRIA System &copy; 2025
     </div>
 </body>
